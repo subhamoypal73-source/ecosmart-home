@@ -641,6 +641,6 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(
-    \`EcoSmart Home server running on port \${PORT}\`
+    `EcoSmart Home server running on port ${PORT}`
   );
 });
