@@ -620,19 +620,9 @@ app.post(
 // Root page
 // --------------------------------------------------
 
+app.use(express.static("public"));
 app.get("/", (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>EcoSmart Home</title>
-      </head>
-      <body>
-        <h1>EcoSmart Home Cloud API</h1>
-        <p>Cloud server is running.</p>
-        <p>ESP8266 API is ready.</p>
-      </body>
-    </html>
-  `);
+  res.sendFile(__dirname + "/public/index.html");
 });
 
 // --------------------------------------------------
