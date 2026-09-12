@@ -1,1 +1,721 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSmart Home</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #172033;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+header {
+  background: #172033;
+  color: white;
+  padding: 22px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 26px;
+}
+
+header p {
+  margin-top: 6px;
+  opacity: .8;
+}
+
+.login,
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccd3df;
+  border-radius: 10px;
+  margin: 8px 0;
+  font-size: 15px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 15px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 4px;
+}
+
+.login button,
+.auto button {
+  background: #172033;
+  color: white;
+}
+
+.status {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.appliances {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 15px;
+}
+
+.appliance h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.state {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.on {
+  color: green;
+}
+
+.off {
+  color: #777;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.onbtn {
+  background: #198754;
+  color: white;
+}
+
+.offbtn {
+  background: #dc3545;
+  color: white;
+}
+
+.erase {
+  background: #6c757d;
+  color: white;
+}
+
+.timer {
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.timer button {
+  background: #315efb;
+  color: white;
+}
+
+.runtime {
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.auto {
+  margin-bottom: 18px;
+}
+
+.small {
+  font-size: 13px;
+  color: #667085;
+}
+
+.hidden {
+  display: none;
+}
+
+#message {
+  margin: 12px 0;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <h1>🏠 EcoSmart Home</h1>
+  <p>IoT-Based Smart Home Automation & Energy Saving System</p>
+</header>
+
+<!-- LOGIN -->
+<div class="login" id="loginBox">
+  <h2>Cloud Dashboard Login</h2>
+  <p class="small">
+    Enter your Admin Token. It is not stored in this webpage.
+  </p>
+
+  <input
+    type="password"
+    id="adminToken"
+    placeholder="Enter Admin Token"
+  >
+
+  <button onclick="login()">Connect Dashboard</button>
+
+  <div id="loginStatus" class="status"></div>
+</div>
+
+<div id="dashboard" class="hidden">
+
+  <div id="message"></div>
+
+  <!-- ROOM AUTO -->
+  <div class="card auto">
+    <h2>🌙 Room Light Auto Mode</h2>
+
+    <p id="autoStatus">
+      Checking...
+    </p>
+
+    <button onclick="setRoomAuto(true)">
+      AUTO ON
+    </button>
+
+    <button onclick="setRoomAuto(false)">
+      AUTO OFF
+    </button>
+
+    <p class="small">
+      AUTO mode uses the LDR for Room Light.
+    </p>
+  </div>
+
+  <!-- APPLIANCES -->
+  <div class="appliances" id="appliances"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let TOKEN = "";
+let appliances = [];
+
+/* -----------------------------
+   LOGIN
+----------------------------- */
+
+function login() {
+
+  const value = document.getElementById("adminToken").value.trim();
+
+  if (!value) {
+    document.getElementById("loginStatus").textContent =
+      "Please enter Admin Token.";
+    return;
+  }
+
+  TOKEN = value;
+
+  loadDashboard();
+}
+
+
+/* -----------------------------
+   API HELPER
+----------------------------- */
+
+async function api(url, options = {}) {
+
+  options.headers = options.headers || {};
+
+  options.headers["X-Admin-Token"] = TOKEN;
+  options.headers["Content-Type"] = "application/json";
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(
+      "Server returned HTTP " + response.status
+    );
+  }
+
+  return response.json();
+}
+
+
+/* -----------------------------
+   LOAD DASHBOARD
+----------------------------- */
+
+async function loadDashboard() {
+
+  try {
+
+    const data = await api("/api/dashboard");
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    appliances =
+      data.appliances ||
+      data ||
+      [];
+
+    renderAppliances();
+
+    if (data.settings) {
+      updateAutoStatus(data.settings.room_auto);
+    }
+
+    document.getElementById("message").textContent =
+      "✅ Dashboard connected.";
+
+    refreshDashboard();
+
+  } catch (error) {
+
+    document.getElementById("loginStatus").textContent =
+      "❌ Login/API error. Check Admin Token.";
+
+    TOKEN = "";
+
+    console.error(error);
+  }
+}
+
+
+/* -----------------------------
+   RENDER APPLIANCES
+   ----------------------------- */
+
+function renderAppliances() {
+
+  const box = document.getElementById("appliances");
+
+  box.innerHTML = "";
+
+  const names = [
+    "Room Light",
+    "Night Light",
+    "Fan",
+    "Desk Light"
+  ];
+
+  for (let i = 0; i < 4; i++) {
+
+    const a = appliances[i] || {
+      id: i,
+      name: names[i],
+      desired_state: false,
+      reported_state: false,
+      runtime_seconds: 0
+    };
+
+    const state =
+      a.desired_state === true ||
+      a.reported_state === true;
+
+    const runtime =
+      Number(a.runtime_seconds || 0);
+
+    box.innerHTML += `
+
+      <div class="card appliance">
+
+        <h2>${escapeHtml(a.name || names[i])}</h2>
+
+        <div class="state ${state ? "on" : "off"}">
+          ● ${state ? "ON" : "OFF"}
+        </div>
+
+        <div class="runtime">
+          ⏱ Runtime:
+          <strong>
+            ${formatRuntime(runtime)}
+          </strong>
+        </div>
+
+        <div class="controls">
+
+          <button
+            class="onbtn"
+            onclick="controlAppliance(${i}, true)">
+            ON
+          </button>
+
+          <button
+            class="offbtn"
+            onclick="controlAppliance(${i}, false)">
+            OFF
+          </button>
+
+          <button
+            class="erase"
+            onclick="eraseRuntime(${i})">
+            Erase Time
+          </button>
+
+        </div>
+
+        <div class="timer">
+
+          <strong>⏰ Timer</strong>
+
+          <input
+            type="number"
+            id="timer-${i}"
+            min="1"
+            placeholder="Minutes"
+          >
+
+          <button
+            onclick="setTimer(${i}, true)">
+            Turn ON after
+          </button>
+
+          <button
+            onclick="setTimer(${i}, false)">
+            Turn OFF after
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }
+}
+
+
+/* -----------------------------
+   APPLIANCE CONTROL
+   ----------------------------- */
+
+async function controlAppliance(id, state) {
+
+  try {
+
+    await api(
+      "/api/control/" + id,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          state: state
+        })
+      }
+    );
+
+    showMessage(
+      "✅ " +
+      (state ? "Turned ON" : "Turned OFF")
+    );
+
+    await refreshDashboard();
+
+  } catch (error) {
+
+    showMessage(
+      "❌ Could not control appliance."
+    );
+
+    console.error(error);
+  }
+}
+
+
+/* -----------------------------
+   ROOM AUTO
+   ----------------------------- */
+
+async function setRoomAuto(value) {
+
+  try {
+
+    await api(
+      "/api/room-auto",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          room_auto: value
+        })
+      }
+    );
+
+    updateAutoStatus(value);
+
+    showMessage(
+      "Room Light Auto Mode: " +
+      (value ? "ON" : "OFF")
+    );
+
+  } catch (error) {
+
+    showMessage(
+      "❌ Could not change Auto Mode."
+    );
+
+    console.error(error);
+  }
+}
+
+
+function updateAutoStatus(value) {
+
+  document.getElementById("autoStatus").textContent =
+    "Room Light Auto Mode: " +
+    (value ? "🟢 ON" : "🔴 OFF");
+}
+
+
+/* -----------------------------
+   ERASE RUNTIME
+   ----------------------------- */
+
+async function eraseRuntime(id) {
+
+  if (!confirm(
+    "Erase runtime for this appliance?"
+  )) {
+    return;
+  }
+
+  try {
+
+    await api(
+      "/api/erase/" + id,
+      {
+        method: "POST"
+      }
+    );
+
+    showMessage(
+      "✅ Runtime erased."
+    );
+
+    await refreshDashboard();
+
+  } catch (error) {
+
+    showMessage(
+      "❌ Runtime erase failed."
+    );
+
+    console.error(error);
+  }
+}
+
+
+/* -----------------------------
+   TIMER
+   ----------------------------- */
+
+async function setTimer(id, state) {
+
+  const input =
+    document.getElementById("timer-" + id);
+
+  const minutes =
+    Number(input.value);
+
+  if (!minutes || minutes <= 0) {
+
+    showMessage(
+      "Enter timer minutes first."
+    );
+
+    return;
+  }
+
+  try {
+
+    await api(
+      "/api/timer/" + id,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          state: state,
+          minutes: minutes
+        })
+      }
+    );
+
+    showMessage(
+      "⏰ Timer set for " +
+      minutes +
+      " minute(s)."
+    );
+
+    input.value = "";
+
+  } catch (error) {
+
+    showMessage(
+      "❌ Timer could not be set."
+    );
+
+    console.error(error);
+  }
+}
+
+
+/* -----------------------------
+   REFRESH
+   ----------------------------- */
+
+async function refreshDashboard() {
+
+  try {
+
+    const data =
+      await api("/api/dashboard");
+
+    appliances =
+      data.appliances ||
+      data ||
+      [];
+
+    renderAppliances();
+
+    if (data.settings) {
+      updateAutoStatus(
+        data.settings.room_auto
+      );
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Refresh error:",
+      error
+    );
+  }
+}
+
+
+/* -----------------------------
+   AUTO REFRESH EVERY 5 SEC
+   ----------------------------- */
+
+setInterval(() => {
+
+  if (TOKEN) {
+    refreshDashboard();
+  }
+
+}, 5000);
+
+
+/* -----------------------------
+   RUNTIME FORMAT
+   ----------------------------- */
+
+function formatRuntime(seconds) {
+
+  seconds = Math.max(
+    0,
+    Math.floor(Number(seconds) || 0)
+  );
+
+  const days =
+    Math.floor(seconds / 86400);
+
+  seconds %= 86400;
+
+  const hours =
+    Math.floor(seconds / 3600);
+
+  seconds %= 3600;
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const secs =
+    seconds % 60;
+
+  if (days > 0) {
+    return (
+      days + "d " +
+      hours + "h " +
+      minutes + "m"
+    );
+  }
+
+  if (hours > 0) {
+    return (
+      hours + "h " +
+      minutes + "m"
+    );
+  }
+
+  if (minutes > 0) {
+    return (
+      minutes + "m " +
+      secs + "s"
+    );
+  }
+
+  return secs + "s";
+}
+
+
+/* -----------------------------
+   MESSAGE
+   ----------------------------- */
+
+function showMessage(text) {
+
+  const box =
+    document.getElementById("message");
+
+  box.textContent = text;
+
+  setTimeout(() => {
+
+    box.textContent = "";
+
+  }, 4000);
+}
+
+
+/* -----------------------------
+   SECURITY
+   ----------------------------- */
+
+function escapeHtml(text) {
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+</script>
+
+</body>
+</html>
