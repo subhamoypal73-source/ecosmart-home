@@ -222,6 +222,10 @@ app.post("/api/device/report", deviceAuth, async (req, res) => {
         ? Number(body.uptime)
         : null;
 
+    // --------------------------------------------------
+    // Update actual/reported state and runtime
+    // --------------------------------------------------
+
     for (let id = 0; id < 4; id++) {
       const state =
         states[id] === true ||
@@ -241,6 +245,48 @@ app.post("/api/device/report", deviceAuth, async (req, res) => {
         .eq("id", id);
     }
 
+    // --------------------------------------------------
+    // Physical switch changes
+    // --------------------------------------------------
+
+    const manualChanges =
+      Array.isArray(body.manualChanges)
+        ? body.manualChanges
+        : [];
+
+    for (const change of manualChanges) {
+      const id = Number(change.id);
+
+      if (![0, 1, 2, 3].includes(id)) {
+        continue;
+      }
+
+      const state =
+        change.state === true ||
+        change.state === 1;
+
+      await supabase
+        .from("appliances")
+        .update({
+          desired_state: state
+        })
+        .eq("id", id);
+
+      // Manual Room Light control disables LDR AUTO.
+      if (id === 0) {
+        await supabase
+          .from("settings")
+          .update({
+            room_auto: false
+          })
+          .eq("id", 1);
+      }
+    }
+
+    // --------------------------------------------------
+    // Device heartbeat
+    // --------------------------------------------------
+
     await supabase
       .from("devices")
       .update({
@@ -250,6 +296,10 @@ app.post("/api/device/report", deviceAuth, async (req, res) => {
         uptime_seconds: uptime
       })
       .eq("id", 1);
+
+    // --------------------------------------------------
+    // Room Light AUTO mode
+    // --------------------------------------------------
 
     if (typeof body.roomAuto === "boolean") {
       await supabase
@@ -273,7 +323,6 @@ app.post("/api/device/report", deviceAuth, async (req, res) => {
     });
   }
 });
-
 // --------------------------------------------------
 // Dashboard data
 // --------------------------------------------------
