@@ -1,721 +1,1387 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>EcoSmart Home</title>
 
 <style>
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
+  margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f7fb;
-  color: #172033;
-  padding: 20px;
-}
-
-.container {
-  max-width: 900px;
-  margin: auto;
+  background: #f3f6f9;
+  color: #17202a;
 }
 
 header {
-  background: #172033;
+  background: #111827;
   color: white;
-  padding: 22px;
-  border-radius: 18px;
-  margin-bottom: 20px;
+  padding: 18px;
+  text-align: center;
 }
 
 header h1 {
-  font-size: 26px;
+  margin: 0;
+  font-size: 25px;
 }
 
 header p {
-  margin-top: 6px;
-  opacity: .8;
+  margin: 6px 0 0;
+  opacity: 0.75;
+  font-size: 13px;
 }
 
-.login,
-.card {
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 18px;
+}
+
+.login-box,
+.panel,
+.appliance-card {
   background: white;
   border-radius: 16px;
   padding: 18px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.07);
 }
 
-input {
+.login-box {
+  max-width: 450px;
+  margin: 50px auto;
+}
+
+input,
+button,
+select {
+  font: inherit;
+}
+
+input[type="password"],
+input[type="number"],
+select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccd3df;
+  border: 1px solid #ccd3da;
   border-radius: 10px;
   margin: 8px 0;
-  font-size: 15px;
+  background: white;
 }
 
 button {
-  border: 0;
+  border: none;
   border-radius: 10px;
-  padding: 11px 15px;
+  padding: 10px 14px;
   cursor: pointer;
-  font-weight: bold;
   margin: 4px;
-}
-
-.login button,
-.auto button {
-  background: #172033;
-  color: white;
-}
-
-.status {
-  margin-top: 10px;
   font-weight: bold;
 }
 
-.appliances {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 15px;
-}
-
-.appliance h2 {
-  font-size: 20px;
-  margin-bottom: 12px;
-}
-
-.state {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.on {
-  color: green;
-}
-
-.off {
-  color: #777;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.onbtn {
-  background: #198754;
+.primary {
+  background: #2563eb;
   color: white;
 }
 
-.offbtn {
-  background: #dc3545;
+.success {
+  background: #16a34a;
   color: white;
 }
 
-.erase {
-  background: #6c757d;
+.danger {
+  background: #dc2626;
   color: white;
 }
 
-.timer {
-  margin-top: 12px;
-  border-top: 1px solid #eee;
-  padding-top: 12px;
-}
-
-.timer button {
-  background: #315efb;
-  color: white;
-}
-
-.runtime {
-  font-size: 14px;
-  margin: 8px 0;
-}
-
-.auto {
-  margin-bottom: 18px;
+.secondary {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 .small {
-  font-size: 13px;
-  color: #667085;
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-#message {
-  margin: 12px 0;
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-item {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 10px;
+  flex: 1;
+  min-width: 130px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 19px;
   font-weight: bold;
+}
+
+.menu-btn {
+  background: transparent;
+  font-size: 25px;
+  padding: 0 8px;
+}
+
+.info {
+  margin-top: 12px;
+  line-height: 1.8;
+}
+
+.online {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.offline {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.control-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.control-row button {
+  flex: 1;
+  min-width: 100px;
+}
+
+.timer-box {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.timer-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.timer-buttons button {
+  flex: 1;
+}
+
+.menu {
+  position: relative;
+}
+
+.menu-content {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  width: 190px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.menu-content button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 0;
+  border-radius: 0;
+  background: white;
+  padding: 13px;
+}
+
+.menu-content button:hover {
+  background: #f3f4f6;
+}
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.modal h2 {
+  margin-top: 0;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.energy {
+  font-weight: bold;
+}
+
+.notice {
+  padding: 12px;
+  background: #eff6ff;
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 10px;
+  }
+
+  .appliance-card {
+    padding: 15px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
 <header>
-  <h1>🏠 EcoSmart Home</h1>
+  <h1>⚡ EcoSmart Home</h1>
   <p>IoT-Based Smart Home Automation & Energy Saving System</p>
 </header>
 
+
 <!-- LOGIN -->
-<div class="login" id="loginBox">
-  <h2>Cloud Dashboard Login</h2>
-  <p class="small">
-    Enter your Admin Token. It is not stored in this webpage.
-  </p>
+<div id="loginScreen" class="container">
 
-  <input
-    type="password"
-    id="adminToken"
-    placeholder="Enter Admin Token"
-  >
+  <div class="login-box">
 
-  <button onclick="login()">Connect Dashboard</button>
-
-  <div id="loginStatus" class="status"></div>
-</div>
-
-<div id="dashboard" class="hidden">
-
-  <div id="message"></div>
-
-  <!-- ROOM AUTO -->
-  <div class="card auto">
-    <h2>🌙 Room Light Auto Mode</h2>
-
-    <p id="autoStatus">
-      Checking...
-    </p>
-
-    <button onclick="setRoomAuto(true)">
-      AUTO ON
-    </button>
-
-    <button onclick="setRoomAuto(false)">
-      AUTO OFF
-    </button>
+    <h2>Dashboard Login</h2>
 
     <p class="small">
-      AUTO mode uses the LDR for Room Light.
+      Enter your dashboard access code.
     </p>
+
+    <input
+      id="loginCode"
+      type="password"
+      placeholder="Access Code"
+      autocomplete="off"
+    >
+
+    <button
+      class="primary"
+      style="width:100%;"
+      onclick="login()"
+    >
+      Login
+    </button>
+
+    <p id="loginMessage"></p>
+
   </div>
 
+</div>
+
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="container hidden">
+
+  <!-- STATUS -->
+  <div class="panel">
+
+    <div class="status-row">
+
+      <div class="status-item">
+        <div class="small">ESP8266</div>
+        <div id="deviceStatus">Checking...</div>
+      </div>
+
+      <div class="status-item">
+        <div class="small">LDR</div>
+        <div id="ldrValue">--</div>
+      </div>
+
+      <div class="status-item">
+        <div class="small">Room Auto</div>
+        <div id="roomAutoStatus">--</div>
+      </div>
+
+      <div class="status-item">
+        <div class="small">Last Seen</div>
+        <div id="lastSeen">--</div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ROOM AUTO -->
+  <div class="panel">
+
+    <h2>💡 Room Light Automatic Mode</h2>
+
+    <p class="small">
+      LDR controls Room Light automatically according to light/dark conditions.
+    </p>
+
+    <button
+      class="success"
+      onclick="setRoomAuto(true)"
+    >
+      Enable AUTO
+    </button>
+
+    <button
+      class="danger"
+      onclick="setRoomAuto(false)"
+    >
+      Disable AUTO
+    </button>
+
+  </div>
+
+
   <!-- APPLIANCES -->
-  <div class="appliances" id="appliances"></div>
+  <div id="cards" class="cards"></div>
+
+
+  <!-- SETTINGS -->
+  <div class="panel">
+
+    <h2>⚙ Dashboard Settings</h2>
+
+    <button
+      class="primary"
+      onclick="openCodeModal()"
+    >
+      Change Access Code
+    </button>
+
+    <button
+      class="secondary"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+
+  </div>
 
 </div>
 
+
+<!-- MODAL -->
+<div
+  id="modalBg"
+  class="modal-bg hidden"
+  onclick="closeModalOutside(event)"
+>
+
+  <div class="modal" id="modalContent"></div>
+
 </div>
+
 
 <script>
 
 let TOKEN = "";
-let appliances = [];
+let dashboardData = null;
 
-/* -----------------------------
-   LOGIN
------------------------------ */
+const applianceIcons = [
+  "💡",
+  "🌙",
+  "🌀",
+  "🔆"
+];
 
-function login() {
 
-  const value = document.getElementById("adminToken").value.trim();
+// =====================================================
+// LOGIN
+// =====================================================
 
-  if (!value) {
-    document.getElementById("loginStatus").textContent =
-      "Please enter Admin Token.";
+async function login() {
+
+  const code =
+    document
+      .getElementById("loginCode")
+      .value
+      .trim();
+
+  if (!code) {
+
+    document
+      .getElementById("loginMessage")
+      .textContent =
+      "Please enter the access code.";
+
     return;
   }
 
-  TOKEN = value;
-
-  loadDashboard();
-}
-
-
-/* -----------------------------
-   API HELPER
------------------------------ */
-
-async function api(url, options = {}) {
-
-  options.headers = options.headers || {};
-
-  options.headers["X-Admin-Token"] = TOKEN;
-  options.headers["Content-Type"] = "application/json";
-
-  const response = await fetch(url, options);
-
-  if (!response.ok) {
-    throw new Error(
-      "Server returned HTTP " + response.status
-    );
-  }
-
-  return response.json();
-}
-
-
-/* -----------------------------
-   LOAD DASHBOARD
------------------------------ */
-
-async function loadDashboard() {
+  TOKEN = code;
 
   try {
 
-    const data = await api("/api/dashboard");
+    const response =
+      await fetch(
+        "/api/dashboard",
+        {
+          headers: {
+            "x-admin-token": TOKEN
+          }
+        }
+      );
 
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
+    if (!response.ok) {
 
-    appliances =
-      data.appliances ||
-      data ||
-      [];
+      TOKEN = "";
 
-    renderAppliances();
+      document
+        .getElementById("loginMessage")
+        .textContent =
+        "Invalid access code.";
 
-    if (data.settings) {
-      updateAutoStatus(data.settings.room_auto);
+      return;
     }
 
-    document.getElementById("message").textContent =
-      "✅ Dashboard connected.";
+    dashboardData =
+      await response.json();
 
-    refreshDashboard();
+    document
+      .getElementById("loginScreen")
+      .classList.add("hidden");
+
+    document
+      .getElementById("dashboard")
+      .classList.remove("hidden");
+
+    renderDashboard();
 
   } catch (error) {
 
-    document.getElementById("loginStatus").textContent =
-      "❌ Login/API error. Check Admin Token.";
+    document
+      .getElementById("loginMessage")
+      .textContent =
+      "Connection error. Please try again.";
+  }
+}
 
-    TOKEN = "";
+
+// =====================================================
+// API HELPER
+// =====================================================
+
+async function api(
+  url,
+  options = {}
+) {
+
+  options.headers = {
+    ...(options.headers || {}),
+    "x-admin-token": TOKEN,
+    "Content-Type": "application/json"
+  };
+
+  const response =
+    await fetch(
+      url,
+      options
+    );
+
+  if (response.status === 401) {
+
+    logout();
+
+    throw new Error(
+      "Unauthorized"
+    );
+  }
+
+  return response;
+}
+
+
+// =====================================================
+// LOAD DASHBOARD
+// =====================================================
+
+async function loadDashboard() {
+
+  if (!TOKEN) return;
+
+  try {
+
+    const response =
+      await api(
+        "/api/dashboard"
+      );
+
+    if (!response.ok) {
+      return;
+    }
+
+    dashboardData =
+      await response.json();
+
+    renderDashboard();
+
+  } catch (error) {
 
     console.error(error);
   }
 }
 
 
-/* -----------------------------
-   RENDER APPLIANCES
-   ----------------------------- */
+// =====================================================
+// RENDER DASHBOARD
+// =====================================================
 
-function renderAppliances() {
+function renderDashboard() {
 
-  const box = document.getElementById("appliances");
+  if (!dashboardData) return;
 
-  box.innerHTML = "";
+  const device =
+    dashboardData.device;
 
-  const names = [
-    "Room Light",
-    "Night Light",
-    "Fan",
-    "Desk Light"
-  ];
+  const settings =
+    dashboardData.settings || {};
 
-  for (let i = 0; i < 4; i++) {
+  const appliances =
+    dashboardData.appliances || [];
 
-    const a = appliances[i] || {
-      id: i,
-      name: names[i],
-      desired_state: false,
-      reported_state: false,
-      runtime_seconds: 0
-    };
+  // Device
+  if (
+    device &&
+    device.online
+  ) {
 
-    const state =
-      a.desired_state === true ||
-      a.reported_state === true;
+    document
+      .getElementById("deviceStatus")
+      .innerHTML =
+      '<span class="online">● ONLINE</span>';
 
-    const runtime =
-      Number(a.runtime_seconds || 0);
+  } else {
 
-    box.innerHTML += `
+    document
+      .getElementById("deviceStatus")
+      .innerHTML =
+      '<span class="offline">● OFFLINE</span>';
+  }
 
-      <div class="card appliance">
 
-        <h2>${escapeHtml(a.name || names[i])}</h2>
+  document
+    .getElementById("ldrValue")
+    .textContent =
+    device &&
+    device.ldr_value !== null &&
+    device.ldr_value !== undefined
+      ? device.ldr_value
+      : "--";
 
-        <div class="state ${state ? "on" : "off"}">
-          ● ${state ? "ON" : "OFF"}
-        </div>
 
-        <div class="runtime">
-          ⏱ Runtime:
-          <strong>
-            ${formatRuntime(runtime)}
-          </strong>
-        </div>
+  document
+    .getElementById("roomAutoStatus")
+    .textContent =
+    settings.room_auto
+      ? "ON"
+      : "OFF";
 
-        <div class="controls">
+
+  document
+    .getElementById("lastSeen")
+    .textContent =
+    device &&
+    device.last_seen
+      ? new Date(
+          device.last_seen
+        ).toLocaleString()
+      : "--";
+
+
+  const cards =
+    document.getElementById(
+      "cards"
+    );
+
+  cards.innerHTML = "";
+
+
+  appliances.forEach(
+    appliance => {
+
+      cards.appendChild(
+        createApplianceCard(
+          appliance
+        )
+      );
+
+    }
+  );
+}
+
+
+// =====================================================
+// APPLIANCE CARD
+// =====================================================
+
+function createApplianceCard(
+  appliance
+) {
+
+  const card =
+    document.createElement(
+      "div"
+    );
+
+  card.className =
+    "appliance-card";
+
+
+  const id =
+    appliance.id;
+
+  const icon =
+    applianceIcons[id] || "⚡";
+
+
+  const desired =
+    !!appliance.desired_state;
+
+  const reported =
+    !!appliance.reported_state;
+
+
+  const state =
+    desired ||
+    reported;
+
+
+  const runtime =
+    Number(
+      appliance.runtime_seconds || 0
+    );
+
+
+  const runtimeText =
+    formatRuntime(runtime);
+
+
+  const power =
+    appliance.power_w;
+
+
+  const energy =
+    dashboardData.todayEnergy &&
+    dashboardData.todayEnergy[id]
+      ? Number(
+          dashboardData.todayEnergy[id]
+        )
+      : 0;
+
+
+  const timer =
+    (dashboardData.timers || [])
+      .find(
+        t =>
+          Number(
+            t.appliance_id
+          ) === id &&
+          t.active
+      );
+
+
+  card.innerHTML = `
+
+    <div class="card-top">
+
+      <div class="card-title">
+        ${icon}
+        ${escapeHtml(appliance.name)}
+      </div>
+
+      <div class="menu">
+
+        <button
+          class="menu-btn"
+          onclick="toggleMenu(${id})"
+        >
+          ⋮
+        </button>
+
+        <div
+          id="menu-${id}"
+          class="menu-content hidden"
+        >
 
           <button
-            class="onbtn"
-            onclick="controlAppliance(${i}, true)">
-            ON
-          </button>
-
-          <button
-            class="offbtn"
-            onclick="controlAppliance(${i}, false)">
-            OFF
-          </button>
-
-          <button
-            class="erase"
-            onclick="eraseRuntime(${i})">
-            Erase Time
-          </button>
-
-        </div>
-
-        <div class="timer">
-
-          <strong>⏰ Timer</strong>
-
-          <input
-            type="number"
-            id="timer-${i}"
-            min="1"
-            placeholder="Minutes"
+            onclick="openHistory(${id})"
           >
-
-          <button
-            onclick="setTimer(${i}, true)">
-            Turn ON after
+            📊 History
           </button>
 
           <button
-            onclick="setTimer(${i}, false)">
-            Turn OFF after
+            onclick="openLoadSettings(${id})"
+          >
+            ⚙ Load Settings
+          </button>
+
+          <button
+            onclick="eraseRuntime(${id})"
+          >
+            🗑 Erase Time
           </button>
 
         </div>
 
       </div>
-    `;
-  }
+
+    </div>
+
+
+    <div class="info">
+
+      <div>
+        Status:
+        <strong>
+          ${state ? "ON" : "OFF"}
+        </strong>
+      </div>
+
+      <div>
+        Load:
+        <strong>
+          ${
+            power === null ||
+            power === undefined
+              ? "Not set"
+              : power + " W"
+          }
+        </strong>
+      </div>
+
+      <div>
+        Runtime:
+        <strong>
+          ${runtimeText}
+        </strong>
+      </div>
+
+      <div>
+        Estimated Today:
+        <strong class="energy">
+          ${formatEnergy(energy)}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="control-row">
+
+      <button
+        class="success"
+        onclick="controlAppliance(${id}, true)"
+      >
+        ON
+      </button>
+
+      <button
+        class="danger"
+        onclick="controlAppliance(${id}, false)"
+      >
+        OFF
+      </button>
+
+    </div>
+
+
+    <div class="timer-box">
+
+      <div class="small">
+        Timer delay in minutes
+      </div>
+
+      <input
+        id="timer-${id}"
+        type="number"
+        min="1"
+        max="10080"
+        inputmode="numeric"
+        placeholder="Example: 5"
+      >
+
+      <div class="timer-buttons">
+
+        <button
+          class="success"
+          onclick="createTimer(${id}, true)"
+        >
+          Turn ON after
+        </button>
+
+        <button
+          class="danger"
+          onclick="createTimer(${id}, false)"
+        >
+          Turn OFF after
+        </button>
+
+      </div>
+
+      ${
+        timer
+          ? `
+            <div class="notice">
+              Timer active:
+              ${timer.target_state ? "ON" : "OFF"}
+              after
+              ${formatTimerDate(timer.execute_at)}
+
+              <br>
+
+              <button
+                class="secondary"
+                onclick="cancelTimer(${timer.id})"
+              >
+                Cancel Timer
+              </button>
+            </div>
+          `
+          : ""
+      }
+
+    </div>
+  `;
+
+  return card;
 }
 
 
-/* -----------------------------
-   APPLIANCE CONTROL
-   ----------------------------- */
+// =====================================================
+// CONTROL
+// =====================================================
 
-async function controlAppliance(id, state) {
+async function controlAppliance(
+  id,
+  state
+) {
 
   try {
 
-    await api(
-      "/api/control/" + id,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          state: state
-        })
-      }
-    );
+    const response =
+      await api(
+        "/api/control/" + id,
+        {
+          method: "POST",
 
-    showMessage(
-      "✅ " +
-      (state ? "Turned ON" : "Turned OFF")
-    );
+          body: JSON.stringify({
+            state
+          })
+        }
+      );
 
-    await refreshDashboard();
+    if (!response.ok) {
+
+      const data =
+        await response.json();
+
+      alert(
+        data.error ||
+        "Control failed."
+      );
+
+      return;
+    }
+
+    await loadDashboard();
 
   } catch (error) {
-
-    showMessage(
-      "❌ Could not control appliance."
-    );
 
     console.error(error);
   }
 }
 
 
-/* -----------------------------
-   ROOM AUTO
-   ----------------------------- */
+// =====================================================
+// ROOM AUTO
+// =====================================================
 
-async function setRoomAuto(value) {
+async function setRoomAuto(
+  enabled
+) {
 
   try {
 
-    await api(
-      "/api/room-auto",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          room_auto: value
-        })
-      }
-    );
+    const response =
+      await api(
+        "/api/room-auto",
+        {
+          method: "POST",
 
-    updateAutoStatus(value);
+          body: JSON.stringify({
+            enabled
+          })
+        }
+      );
 
-    showMessage(
-      "Room Light Auto Mode: " +
-      (value ? "ON" : "OFF")
-    );
+    if (!response.ok) {
+
+      alert(
+        "Could not change Room Auto."
+      );
+
+      return;
+    }
+
+    await loadDashboard();
 
   } catch (error) {
-
-    showMessage(
-      "❌ Could not change Auto Mode."
-    );
 
     console.error(error);
   }
 }
 
 
-function updateAutoStatus(value) {
+// =====================================================
+// TIMER
+// =====================================================
 
-  document.getElementById("autoStatus").textContent =
-    "Room Light Auto Mode: " +
-    (value ? "🟢 ON" : "🔴 OFF");
-}
-
-
-/* -----------------------------
-   ERASE RUNTIME
-   ----------------------------- */
-
-async function eraseRuntime(id) {
-
-  if (!confirm(
-    "Erase runtime for this appliance?"
-  )) {
-    return;
-  }
-
-  try {
-
-    await api(
-      "/api/erase/" + id,
-      {
-        method: "POST"
-      }
-    );
-
-    showMessage(
-      "✅ Runtime erased."
-    );
-
-    await refreshDashboard();
-
-  } catch (error) {
-
-    showMessage(
-      "❌ Runtime erase failed."
-    );
-
-    console.error(error);
-  }
-}
-
-
-/* -----------------------------
-   TIMER
-   ----------------------------- */
-
-async function setTimer(id, state) {
+async function createTimer(
+  id,
+  state
+) {
 
   const input =
-    document.getElementById("timer-" + id);
+    document.getElementById(
+      "timer-" + id
+    );
 
   const minutes =
     Number(input.value);
 
-  if (!minutes || minutes <= 0) {
 
-    showMessage(
-      "Enter timer minutes first."
+  if (
+    !Number.isFinite(minutes) ||
+    minutes <= 0
+  ) {
+
+    alert(
+      "Enter a valid number of minutes."
     );
+
+    input.focus();
 
     return;
   }
 
+
   try {
 
-    await api(
-      "/api/timer/" + id,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          state: state,
-          minutes: minutes
-        })
-      }
-    );
+    const response =
+      await api(
+        "/api/timer/" + id,
+        {
+          method: "POST",
 
-    showMessage(
-      "⏰ Timer set for " +
-      minutes +
-      " minute(s)."
-    );
+          body: JSON.stringify({
+            minutes,
+            state
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      alert(
+        data.error ||
+        "Timer failed."
+      );
+
+      return;
+    }
+
 
     input.value = "";
 
-  } catch (error) {
+    await loadDashboard();
 
-    showMessage(
-      "❌ Timer could not be set."
-    );
+  } catch (error) {
 
     console.error(error);
   }
 }
 
 
-/* -----------------------------
-   REFRESH
-   ----------------------------- */
+// =====================================================
+// CANCEL TIMER
+// =====================================================
 
-async function refreshDashboard() {
+async function cancelTimer(
+  id
+) {
 
   try {
 
-    const data =
-      await api("/api/dashboard");
-
-    appliances =
-      data.appliances ||
-      data ||
-      [];
-
-    renderAppliances();
-
-    if (data.settings) {
-      updateAutoStatus(
-        data.settings.room_auto
+    const response =
+      await api(
+        "/api/timer/" + id,
+        {
+          method: "DELETE"
+        }
       );
+
+
+    if (!response.ok) {
+
+      alert(
+        "Could not cancel timer."
+      );
+
+      return;
     }
+
+
+    await loadDashboard();
 
   } catch (error) {
 
-    console.error(
-      "Refresh error:",
-      error
-    );
+    console.error(error);
   }
 }
 
 
-/* -----------------------------
-   AUTO REFRESH EVERY 5 SEC
-   ----------------------------- */
+// =====================================================
+// ERASE RUNTIME
+// =====================================================
 
-setInterval(() => {
+async function eraseRuntime(
+  id
+) {
 
-  if (TOKEN) {
-    refreshDashboard();
-  }
+  const appliance =
+    dashboardData.appliances
+      .find(
+        a =>
+          Number(a.id) === id
+      );
 
-}, 5000);
 
-
-/* -----------------------------
-   RUNTIME FORMAT
-   ----------------------------- */
-
-function formatRuntime(seconds) {
-
-  seconds = Math.max(
-    0,
-    Math.floor(Number(seconds) || 0)
-  );
-
-  const days =
-    Math.floor(seconds / 86400);
-
-  seconds %= 86400;
-
-  const hours =
-    Math.floor(seconds / 3600);
-
-  seconds %= 3600;
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  const secs =
-    seconds % 60;
-
-  if (days > 0) {
-    return (
-      days + "d " +
-      hours + "h " +
-      minutes + "m"
+  const confirmed =
+    confirm(
+      "Erase runtime for " +
+      (appliance
+        ? appliance.name
+        : "this appliance") +
+      "?"
     );
+
+
+  if (!confirmed) {
+    return;
   }
 
-  if (hours > 0) {
-    return (
-      hours + "h " +
-      minutes + "m"
-    );
-  }
 
-  if (minutes > 0) {
-    return (
-      minutes + "m " +
-      secs + "s"
-    );
-  }
+  try {
 
-  return secs + "s";
+    const response =
+      await api(
+        "/api/erase/" + id,
+        {
+          method: "POST"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      alert(
+        data.error ||
+        "Erase failed."
+      );
+
+      return;
+    }
+
+
+    await loadDashboard();
+
+  } catch (error) {
+
+    console.error(error);
+  }
 }
 
 
-/* -----------------------------
-   MESSAGE
-   ----------------------------- */
+// =====================================================
+// LOAD SETTINGS
+// =====================================================
 
-function showMessage(text) {
+function openLoadSettings(
+  id
+) {
 
-  const box =
-    document.getElementById("message");
+  const appliance =
+    dashboardData.appliances
+      .find(
+        a =>
+          Number(a.id) === id
+      );
 
-  box.textContent = text;
 
-  setTimeout(() => {
+  if (!appliance) return;
 
-    box.textContent = "";
 
-  }, 4000);
+  openModal(`
+    <h2>⚙ Load Settings</h2>
+
+    <p>
+      ${applianceIcons[id]}
+      <strong>
+        ${escapeHtml(appliance.name)}
+      </strong>
+    </p>
+
+    <p class="small">
+      Enter the rated power of this appliance.
+      Example: a 9W bulb → enter 9.
+    </p>
+
+    <input
+      id="loadWatts"
+      type="number"
+      min="0"
+      max="10000"
+      step="0.1"
+      inputmode="decimal"
+      placeholder="Power in Watts"
+      value="${
+        appliance.power_w === null ||
+        appliance.power_w === undefined
+          ? ""
+          : appliance.power_w
+      }"
+    >
+
+    <button
+      class="primary"
+      onclick="saveLoadSettings(${id})"
+    >
+      Save Watt
+    </button>
+
+    <button
+      class="secondary"
+      onclick="closeModal()"
+    >
+      Cancel
+    </button>
+
+    <div class="notice">
+      Energy is estimated from:
+      <br>
+      <strong>
+        Watt × Runtime
+      </strong>
+      <br>
+      No physical power sensor is being used.
+    </div>
+  `);
 }
 
 
-/* -----------------------------
-   SECURITY
-   ----------------------------- */
+async function saveLoadSettings(
+  id
+) {
 
-function escapeHtml(text) {
+  const watts =
+    Number(
+      document
+        .getElementById(
+          "loadWatts"
+        )
+        .value
+    );
 
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+
+  if (
+    !Number.isFinite(watts) ||
+    watts < 0
+  ) {
+
+    alert(
+      "Enter a valid Watt value."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await api(
+        "/api/load/" + id,
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            watts
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      alert(
+        data.error ||
+        "Could not save Watt."
+      );
+
+      return;
+    }
+
+
+    closeModal();
+
+    await loadDashboard();
+
+  } catch (error) {
+
+    console.error(error);
+  }
 }
 
-</script>
 
-</body>
-</html>
+// =====================================================
+// HISTORY
+// =====================================================
+
+async function openHistory(
+  id
+) {
+
+  const appliance =
+    dashboardData.appliances
+      .find(
+        a =>
+          Number(a.id) === id
+      );
+
+
+  if (!appliance) return;
+
+
+  openModal(`
+    <h2>
+      📊 ${escapeHtml(appliance.name)} History
+    </h2>
+
+    <select id="historyPeriod">
+      <option value="today">Today</option>
+      <option value="month">This Month</option>
+      <option value="year">This Year</option>
+    </select>
+
+    <div id="historyContent">
+      Loading...
+    </div>
+  `);
+
+
+  document
+    .getElementById(
+      "historyPeriod"
+    )
+    .addEventListener(
+      "change",
+      () => loadHistory(
+        id
+      )
+    );
+
+
+  await loadHistory(id);
+}
+
+
+async function loadHistory(
+  id
+) {
+
+  const period =
+    document
+      .getElementById(
+        "historyPeriod"
+      )
+      .value;
+
+
+  const content =
+    document
+      .getElementById(
+        "historyContent"
+      );
+
+
+  content.innerHTML =
+    "Loading...";
+
+
+  try {
+
+    const response =
+      await api(
+ 
