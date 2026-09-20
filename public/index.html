@@ -2,1196 +2,1030 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>EcoSmart Home</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
 }
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f3f6f9;
-  color: #17202a;
+header{
+  background:#172033;
+  color:white;
+  padding:18px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-header {
-  background: #111827;
-  color: white;
-  padding: 18px;
-  text-align: center;
+header h1{margin:0;font-size:21px}
+header small{opacity:.75}
+main{max-width:1100px;margin:auto;padding:18px}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 4px 18px rgba(0,0,0,.07);
 }
-
-header h1 {
-  margin: 0;
-  font-size: 25px;
+.login{
+  max-width:420px;
+  margin:70px auto;
 }
-
-header p {
-  margin: 6px 0 0;
-  opacity: 0.75;
-  font-size: 13px;
+input,select,button{
+  font:inherit;
 }
-
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 18px;
+input,select{
+  width:100%;
+  padding:12px;
+  margin:7px 0 12px;
+  border:1px solid #ccd3df;
+  border-radius:9px;
 }
-
-.login-box,
-.panel,
-.appliance-card {
-  background: white;
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 16px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+button{
+  border:0;
+  border-radius:9px;
+  padding:11px 15px;
+  cursor:pointer;
 }
-
-.login-box {
-  max-width: 450px;
-  margin: 50px auto;
+.primary{
+  background:#172033;
+  color:white;
+  width:100%;
 }
-
-input,
-button,
-select {
-  font: inherit;
+.danger{background:#e74c3c;color:white}
+.secondary{background:#e9edf4}
+.success{background:#21a366;color:white}
+.status{
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  display:none;
 }
+.error{background:#ffe5e2;color:#a00000}
+.ok{background:#e1f7e8;color:#08752d}
 
-input[type="password"],
-input[type="number"],
-select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccd3da;
-  border-radius: 10px;
-  margin: 8px 0;
-  background: white;
+.topgrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
-
-button {
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  margin: 4px;
-  font-weight: bold;
+.stat{
+  padding:15px;
+  background:#f4f7fb;
+  border-radius:12px;
 }
+.stat b{display:block;font-size:20px;margin-top:5px}
 
-.primary {
-  background: #2563eb;
-  color: white;
+.appliances{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
 }
-
-.success {
-  background: #16a34a;
-  color: white;
+.appliance{
+  border:1px solid #e0e5ec;
+  border-radius:15px;
+  padding:16px;
 }
-
-.danger {
-  background: #dc2626;
-  color: white;
+.appliance h3{margin:0 0 8px}
+.state{
+  font-weight:bold;
+  margin:7px 0 12px;
 }
-
-.secondary {
-  background: #e5e7eb;
-  color: #111827;
+.on{color:#159447}
+.off{color:#777}
+.row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
 }
-
-.small {
-  font-size: 12px;
-  opacity: 0.7;
+.row button{flex:1;min-width:90px}
+.menu{
+  position:relative;
 }
-
-.hidden {
-  display: none !important;
+.menu button{
+  background:#eef2f7;
 }
-
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+.menuBox{
+  display:none;
+  position:absolute;
+  right:0;
+  top:42px;
+  background:white;
+  width:180px;
+  padding:7px;
+  border-radius:10px;
+  box-shadow:0 5px 20px rgba(0,0,0,.18);
+  z-index:20;
 }
-
-.status-item {
-  background: #f3f4f6;
-  padding: 12px;
-  border-radius: 10px;
-  flex: 1;
-  min-width: 130px;
+.menuBox button{
+  width:100%;
+  margin:3px 0;
+  text-align:left;
+  background:white;
 }
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+.timer{
+  background:#fff7df;
+  padding:10px;
+  border-radius:9px;
+  margin-top:10px;
+  font-size:14px;
 }
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.modalBg{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:50;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
 }
-
-.card-title {
-  font-size: 19px;
-  font-weight: bold;
+.modal{
+  background:white;
+  width:min(500px,100%);
+  max-height:90vh;
+  overflow:auto;
+  border-radius:15px;
+  padding:20px;
 }
-
-.menu-btn {
-  background: transparent;
-  font-size: 25px;
-  padding: 0 8px;
+.modalHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-.info {
-  margin-top: 12px;
-  line-height: 1.8;
+.close{
+  background:#eee;
+  font-size:18px;
 }
-
-.online {
-  color: #16a34a;
-  font-weight: bold;
+.historyRow{
+  border-bottom:1px solid #e4e7ec;
+  padding:10px 0;
 }
+.hidden{display:none!important}
 
-.offline {
-  color: #dc2626;
-  font-weight: bold;
-}
-
-.control-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-
-.control-row button {
-  flex: 1;
-  min-width: 100px;
-}
-
-.timer-box {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.timer-buttons {
-  display: flex;
-  gap: 5px;
-}
-
-.timer-buttons button {
-  flex: 1;
-}
-
-.menu {
-  position: relative;
-}
-
-.menu-content {
-  position: absolute;
-  right: 0;
-  top: 35px;
-  background: white;
-  width: 190px;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
-  z-index: 50;
-  overflow: hidden;
-}
-
-.menu-content button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  margin: 0;
-  border-radius: 0;
-  background: white;
-  padding: 13px;
-}
-
-.menu-content button:hover {
-  background: #f3f4f6;
-}
-
-.modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-  z-index: 100;
-}
-
-.modal {
-  background: white;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 18px;
-  padding: 20px;
-}
-
-.modal h2 {
-  margin-top: 0;
-}
-
-.history-row {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #eee;
-  padding: 10px 0;
-}
-
-.energy {
-  font-weight: bold;
-}
-
-.notice {
-  padding: 12px;
-  background: #eff6ff;
-  border-radius: 10px;
-  margin-top: 10px;
-  font-size: 13px;
-}
-
-@media (max-width: 700px) {
-  .cards {
-    grid-template-columns: 1fr;
+@media(max-width:700px){
+  .topgrid,.appliances{
+    grid-template-columns:1fr;
   }
-
-  .container {
-    padding: 10px;
-  }
-
-  .appliance-card {
-    padding: 15px;
-  }
+  main{padding:12px}
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>⚡ EcoSmart Home</h1>
-  <p>IoT-Based Smart Home Automation & Energy Saving System</p>
-</header>
-
-
-<!-- LOGIN -->
-<div id="loginScreen" class="container">
-
-  <div class="login-box">
-
-    <h2>Dashboard Login</h2>
-
-    <p class="small">
-      Enter your dashboard access code.
-    </p>
+<div id="loginPage">
+  <div class="card login">
+    <h2>EcoSmart Home</h2>
+    <p>Dashboard Access</p>
 
     <input
       id="loginCode"
       type="password"
-      placeholder="Access Code"
+      placeholder="Enter access code"
       autocomplete="off"
     >
 
     <button
+      id="loginBtn"
       class="primary"
-      style="width:100%;"
+      type="button"
       onclick="login()"
     >
       Login
     </button>
 
-    <p id="loginMessage"></p>
-
+    <div id="loginStatus" class="status"></div>
   </div>
-
 </div>
 
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="container hidden">
+<div id="dashboardPage" class="hidden">
 
-  <!-- STATUS -->
-  <div class="panel">
-
-    <div class="status-row">
-
-      <div class="status-item">
-        <div class="small">ESP8266</div>
-        <div id="deviceStatus">Checking...</div>
-      </div>
-
-      <div class="status-item">
-        <div class="small">LDR</div>
-        <div id="ldrValue">--</div>
-      </div>
-
-      <div class="status-item">
-        <div class="small">Room Auto</div>
-        <div id="roomAutoStatus">--</div>
-      </div>
-
-      <div class="status-item">
-        <div class="small">Last Seen</div>
-        <div id="lastSeen">--</div>
-      </div>
-
-    </div>
-
+<header>
+  <div>
+    <h1>EcoSmart Home</h1>
+    <small>IoT Smart Home Dashboard</small>
   </div>
 
-
-  <!-- ROOM AUTO -->
-  <div class="panel">
-
-    <h2>💡 Room Light Automatic Mode</h2>
-
-    <p class="small">
-      LDR controls Room Light automatically according to light/dark conditions.
-    </p>
-
+  <div class="row">
     <button
-      class="success"
-      onclick="setRoomAuto(true)"
-    >
-      Enable AUTO
-    </button>
-
-    <button
-      class="danger"
-      onclick="setRoomAuto(false)"
-    >
-      Disable AUTO
-    </button>
-
-  </div>
-
-
-  <!-- APPLIANCES -->
-  <div id="cards" class="cards"></div>
-
-
-  <!-- SETTINGS -->
-  <div class="panel">
-
-    <h2>⚙ Dashboard Settings</h2>
-
-    <button
-      class="primary"
+      type="button"
+      class="secondary"
       onclick="openCodeModal()"
     >
-      Change Access Code
+      Access Code
     </button>
 
     <button
-      class="secondary"
+      type="button"
+      class="danger"
       onclick="logout()"
     >
       Logout
     </button>
+  </div>
+</header>
+
+
+<main>
+
+<div id="globalStatus" class="status"></div>
+
+
+<div class="card">
+  <h2>System Status</h2>
+
+  <div class="topgrid">
+
+    <div class="stat">
+      Device
+      <b id="deviceStatus">Offline</b>
+    </div>
+
+    <div class="stat">
+      LDR
+      <b id="ldrValue">--</b>
+    </div>
+
+    <div class="stat">
+      Room Auto
+      <b id="roomAutoText">OFF</b>
+    </div>
 
   </div>
 
+  <br>
+
+  <label>
+    <input
+      id="roomAuto"
+      type="checkbox"
+      style="width:auto"
+      onchange="setRoomAuto(this.checked)"
+    >
+    Automatic Room Light control
+  </label>
 </div>
 
 
-<!-- MODAL -->
+<div class="card">
+  <h2>Appliances</h2>
+  <div id="appliances" class="appliances"></div>
+</div>
+
+</main>
+</div>
+
+
+<!-- GENERAL MODAL -->
 <div
   id="modalBg"
-  class="modal-bg hidden"
+  class="modalBg"
   onclick="closeModalOutside(event)"
 >
+  <div
+    class="modal"
+    onclick="event.stopPropagation()"
+  >
+    <div class="modalHeader">
+      <h2 id="modalTitle">EcoSmart</h2>
+      <button
+        type="button"
+        class="close"
+        onclick="closeModal()"
+      >
+        ×
+      </button>
+    </div>
 
-  <div class="modal" id="modalContent"></div>
-
+    <div id="modalContent"></div>
+  </div>
 </div>
 
 
 <script>
 
+const API_BASE = "";
+
 let TOKEN = "";
 let dashboardData = null;
-
-const applianceIcons = [
-  "💡",
-  "🌙",
-  "🌀",
-  "🔆"
-];
+let refreshTimer = null;
 
 
-// =====================================================
-// LOGIN
-// =====================================================
+/* =========================
+   BASIC HELPERS
+========================= */
 
-async function login() {
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
 
-  const code =
-    document
-      .getElementById("loginCode")
-      .value
-      .trim();
 
-  if (!code) {
+function showLoginStatus(message,good=false){
+  const el=document.getElementById("loginStatus");
 
-    document
-      .getElementById("loginMessage")
-      .textContent =
-      "Please enter the access code.";
+  el.textContent=message;
+  el.className="status "+(good?"ok":"error");
+  el.style.display="block";
+}
 
+
+function showStatus(message,good=true){
+  const el=document.getElementById("globalStatus");
+
+  el.textContent=message;
+  el.className="status "+(good?"ok":"error");
+  el.style.display="block";
+
+  setTimeout(()=>{
+    el.style.display="none";
+  },3000);
+}
+
+
+async function api(url,options={}){
+  const headers={
+    "Content-Type":"application/json",
+    ...(options.headers||{})
+  };
+
+  if(TOKEN){
+    headers["x-admin-token"]=TOKEN;
+  }
+
+  const response=await fetch(
+    API_BASE+url,
+    {
+      ...options,
+      headers
+    }
+  );
+
+  let data={};
+
+  try{
+    data=await response.json();
+  }catch{
+    data={};
+  }
+
+  if(!response.ok){
+    throw new Error(
+      data.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return data;
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+async function login(){
+
+  const input=document.getElementById("loginCode");
+  const button=document.getElementById("loginBtn");
+
+  const code=input.value.trim();
+
+  if(!code){
+    showLoginStatus("Please enter the access code.");
     return;
   }
 
-  TOKEN = code;
+  button.disabled=true;
+  button.textContent="Checking...";
 
-  try {
+  try{
 
-    const response =
-      await fetch(
-        "/api/dashboard",
-        {
-          headers: {
-            "x-admin-token": TOKEN
-          }
-        }
-      );
+    TOKEN=code;
 
-    if (!response.ok) {
+    const data=await api("/api/dashboard");
 
-      TOKEN = "";
-
-      document
-        .getElementById("loginMessage")
-        .textContent =
-        "Invalid access code.";
-
-      return;
-    }
-
-    dashboardData =
-      await response.json();
+    dashboardData=data;
 
     document
-      .getElementById("loginScreen")
+      .getElementById("loginPage")
       .classList.add("hidden");
 
     document
-      .getElementById("dashboard")
+      .getElementById("dashboardPage")
       .classList.remove("hidden");
 
     renderDashboard();
 
-  } catch (error) {
+    startAutoRefresh();
 
-    document
-      .getElementById("loginMessage")
-      .textContent =
-      "Connection error. Please try again.";
+  }catch(error){
+
+    TOKEN="";
+
+    showLoginStatus(
+      error.message || "Login failed."
+    );
+
+  }finally{
+
+    button.disabled=false;
+    button.textContent="Login";
   }
 }
 
 
-// =====================================================
-// API HELPER
-// =====================================================
-
-async function api(
-  url,
-  options = {}
-) {
-
-  options.headers = {
-    ...(options.headers || {}),
-    "x-admin-token": TOKEN,
-    "Content-Type": "application/json"
-  };
-
-  const response =
-    await fetch(
-      url,
-      options
-    );
-
-  if (response.status === 401) {
-
-    logout();
-
-    throw new Error(
-      "Unauthorized"
-    );
-  }
-
-  return response;
-}
-
-
-// =====================================================
-// LOAD DASHBOARD
-// =====================================================
-
-async function loadDashboard() {
-
-  if (!TOKEN) return;
-
-  try {
-
-    const response =
-      await api(
-        "/api/dashboard"
-      );
-
-    if (!response.ok) {
-      return;
+document
+  .getElementById("loginCode")
+  .addEventListener(
+    "keydown",
+    event=>{
+      if(event.key==="Enter"){
+        login();
+      }
     }
+  );
 
-    dashboardData =
-      await response.json();
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function loadDashboard(){
+
+  try{
+
+    dashboardData=
+      await api("/api/dashboard");
 
     renderDashboard();
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    if(
+      error.message.includes("Unauthorized")
+    ){
+      logout();
+      return;
+    }
+
+    showStatus(
+      "Dashboard refresh failed: "+
+      error.message,
+      false
+    );
   }
 }
 
 
-// =====================================================
-// RENDER DASHBOARD
-// =====================================================
+function startAutoRefresh(){
 
-function renderDashboard() {
-
-  if (!dashboardData) return;
-
-  const device =
-    dashboardData.device;
-
-  const settings =
-    dashboardData.settings || {};
-
-  const appliances =
-    dashboardData.appliances || [];
-
-  // Device
-  if (
-    device &&
-    device.online
-  ) {
-
-    document
-      .getElementById("deviceStatus")
-      .innerHTML =
-      '<span class="online">● ONLINE</span>';
-
-  } else {
-
-    document
-      .getElementById("deviceStatus")
-      .innerHTML =
-      '<span class="offline">● OFFLINE</span>';
+  if(refreshTimer){
+    clearInterval(refreshTimer);
   }
 
+  refreshTimer=
+    setInterval(
+      loadDashboard,
+      10000
+    );
+}
 
-  document
-    .getElementById("ldrValue")
-    .textContent =
+
+function renderDashboard(){
+
+  if(!dashboardData){
+    return;
+  }
+
+  const device=
+    dashboardData.device;
+
+  document.getElementById(
+    "deviceStatus"
+  ).textContent=
+    device && device.online
+      ? "Online"
+      : "Offline";
+
+  document.getElementById(
+    "ldrValue"
+  ).textContent=
     device &&
     device.ldr_value !== null &&
     device.ldr_value !== undefined
       ? device.ldr_value
       : "--";
 
+  const roomAuto=
+    !!(
+      dashboardData.settings &&
+      dashboardData.settings.room_auto
+    );
 
-  document
-    .getElementById("roomAutoStatus")
-    .textContent =
-    settings.room_auto
+  document.getElementById(
+    "roomAuto"
+  ).checked=roomAuto;
+
+  document.getElementById(
+    "roomAutoText"
+  ).textContent=
+    roomAuto
       ? "ON"
       : "OFF";
 
-
-  document
-    .getElementById("lastSeen")
-    .textContent =
-    device &&
-    device.last_seen
-      ? new Date(
-          device.last_seen
-        ).toLocaleString()
-      : "--";
-
-
-  const cards =
-    document.getElementById(
-      "cards"
-    );
-
-  cards.innerHTML = "";
-
-
-  appliances.forEach(
-    appliance => {
-
-      cards.appendChild(
-        createApplianceCard(
-          appliance
-        )
-      );
-
-    }
-  );
+  createApplianceCards();
 }
 
 
-// =====================================================
-// APPLIANCE CARD
-// =====================================================
+/* =========================
+   APPLIANCES
+========================= */
 
-function createApplianceCard(
-  appliance
-) {
+function createApplianceCards(){
 
-  const card =
-    document.createElement(
+  const container=
+    document.getElementById(
+      "appliances"
+    );
+
+  const appliances=
+    dashboardData.appliances || [];
+
+  container.innerHTML="";
+
+  appliances.forEach(appliance=>{
+
+    const state=
+      !!appliance.desired_state;
+
+    const reported=
+      !!appliance.reported_state;
+
+    const todayEnergy=
+      dashboardData.todayEnergy &&
+      dashboardData.todayEnergy[
+        appliance.id
+      ] !== undefined
+        ? Number(
+            dashboardData.todayEnergy[
+              appliance.id
+            ]
+          )
+        : 0;
+
+    const timers=
+      (dashboardData.timers || [])
+        .filter(
+          t=>
+            Number(t.appliance_id) ===
+            Number(appliance.id) &&
+            t.active
+        );
+
+    let timerHtml="";
+
+    if(timers.length){
+
+      const timer=timers[0];
+
+      timerHtml=`
+        <div class="timer">
+          Timer:
+          <b>${timer.target_state ? "ON" : "OFF"}</b>
+          at
+          ${escapeHtml(
+            formatTimerDate(
+              timer.execute_at
+            )
+          )}
+          <br><br>
+          <button
+            type="button"
+            class="danger"
+            onclick="cancelTimer(${timer.id})"
+          >
+            Cancel Timer
+          </button>
+        </div>
+      `;
+    }
+
+    const card=document.createElement(
       "div"
     );
 
-  card.className =
-    "appliance-card";
+    card.className="appliance";
 
+    card.innerHTML=`
 
-  const id =
-    appliance.id;
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+      ">
 
-  const icon =
-    applianceIcons[id] || "⚡";
+        <div>
+          <h3>
+            ${escapeHtml(appliance.name)}
+          </h3>
 
+          <div class="state ${
+            state ? "on":"off"
+          }">
+            Desired:
+            ${state ? "ON":"OFF"}
+          </div>
 
-  const desired =
-    !!appliance.desired_state;
+          <div>
+            Device:
+            <b>
+              ${reported ? "ON":"OFF"}
+            </b>
+          </div>
+        </div>
 
-  const reported =
-    !!appliance.reported_state;
-
-
-  const state =
-    desired ||
-    reported;
-
-
-  const runtime =
-    Number(
-      appliance.runtime_seconds || 0
-    );
-
-
-  const runtimeText =
-    formatRuntime(runtime);
-
-
-  const power =
-    appliance.power_w;
-
-
-  const energy =
-    dashboardData.todayEnergy &&
-    dashboardData.todayEnergy[id]
-      ? Number(
-          dashboardData.todayEnergy[id]
-        )
-      : 0;
-
-
-  const timer =
-    (dashboardData.timers || [])
-      .find(
-        t =>
-          Number(
-            t.appliance_id
-          ) === id &&
-          t.active
-      );
-
-
-  card.innerHTML = `
-
-    <div class="card-top">
-
-      <div class="card-title">
-        ${icon}
-        ${escapeHtml(appliance.name)}
-      </div>
-
-      <div class="menu">
-
-        <button
-          class="menu-btn"
-          onclick="toggleMenu(${id})"
-        >
-          ⋮
-        </button>
-
-        <div
-          id="menu-${id}"
-          class="menu-content hidden"
-        >
+        <div class="menu">
 
           <button
-            onclick="openHistory(${id})"
+            type="button"
+            onclick="toggleMenu(${appliance.id})"
           >
-            📊 History
+            ⋮
           </button>
 
-          <button
-            onclick="openLoadSettings(${id})"
+          <div
+            id="menu-${appliance.id}"
+            class="menuBox"
           >
-            ⚙ Load Settings
-          </button>
 
-          <button
-            onclick="eraseRuntime(${id})"
-          >
-            🗑 Erase Time
-          </button>
+            <button
+              type="button"
+              onclick="openHistory(${appliance.id})"
+            >
+              History
+            </button>
+
+            <button
+              type="button"
+              onclick="openLoadSettings(${appliance.id})"
+            >
+              Load Settings
+            </button>
+
+            <button
+              type="button"
+              onclick="eraseRuntime(${appliance.id})"
+            >
+              Erase Time
+            </button>
+
+          </div>
 
         </div>
 
       </div>
 
-    </div>
 
-
-    <div class="info">
+      <hr>
 
       <div>
-        Status:
-        <strong>
-          ${state ? "ON" : "OFF"}
-        </strong>
+        Runtime:
+        <b>
+          ${formatRuntime(
+            appliance.runtime_seconds
+          )}
+        </b>
+      </div>
+
+      <div>
+        Estimated Energy Today:
+        <b>
+          ${formatEnergy(todayEnergy)}
+        </b>
       </div>
 
       <div>
         Load:
-        <strong>
+        <b>
           ${
-            power === null ||
-            power === undefined
+            appliance.power_w === null ||
+            appliance.power_w === undefined
               ? "Not set"
-              : power + " W"
+              : escapeHtml(
+                  appliance.power_w
+                )+" W"
           }
-        </strong>
+        </b>
       </div>
 
-      <div>
-        Runtime:
-        <strong>
-          ${runtimeText}
-        </strong>
-      </div>
+      <br>
 
-      <div>
-        Estimated Today:
-        <strong class="energy">
-          ${formatEnergy(energy)}
-        </strong>
-      </div>
-
-    </div>
-
-
-    <div class="control-row">
-
-      <button
-        class="success"
-        onclick="controlAppliance(${id}, true)"
-      >
-        ON
-      </button>
-
-      <button
-        class="danger"
-        onclick="controlAppliance(${id}, false)"
-      >
-        OFF
-      </button>
-
-    </div>
-
-
-    <div class="timer-box">
-
-      <div class="small">
-        Timer delay in minutes
-      </div>
-
-      <input
-        id="timer-${id}"
-        type="number"
-        min="1"
-        max="10080"
-        inputmode="numeric"
-        placeholder="Example: 5"
-      >
-
-      <div class="timer-buttons">
+      <div class="row">
 
         <button
+          type="button"
           class="success"
-          onclick="createTimer(${id}, true)"
+          onclick="controlAppliance(${appliance.id},true)"
         >
-          Turn ON after
+          ON
         </button>
 
         <button
+          type="button"
           class="danger"
-          onclick="createTimer(${id}, false)"
+          onclick="controlAppliance(${appliance.id},false)"
         >
-          Turn OFF after
+          OFF
         </button>
 
       </div>
 
-      ${
-        timer
-          ? `
-            <div class="notice">
-              Timer active:
-              ${timer.target_state ? "ON" : "OFF"}
-              after
-              ${formatTimerDate(timer.execute_at)}
 
-              <br>
+      <br>
 
-              <button
-                class="secondary"
-                onclick="cancelTimer(${timer.id})"
-              >
-                Cancel Timer
-              </button>
-            </div>
-          `
-          : ""
-      }
+      <div>
+        <b>Timer</b>
 
-    </div>
-  `;
+        <input
+          id="minutes-${appliance.id}"
+          type="number"
+          min="1"
+          max="10080"
+          placeholder="Delay in minutes"
+        >
 
-  return card;
+        <select
+          id="timerState-${appliance.id}"
+        >
+          <option value="true">
+            Turn ON
+          </option>
+          <option value="false">
+            Turn OFF
+          </option>
+        </select>
+
+        <button
+          type="button"
+          class="secondary"
+          style="width:100%"
+          onclick="createTimer(${appliance.id})"
+        >
+          Set Timer
+        </button>
+
+      </div>
+
+      ${timerHtml}
+
+    `;
+
+    container.appendChild(card);
+  });
 }
 
 
-// =====================================================
-// CONTROL
-// =====================================================
+/* =========================
+   CONTROL
+========================= */
 
 async function controlAppliance(
   id,
   state
-) {
+){
 
-  try {
+  try{
 
-    const response =
-      await api(
-        "/api/control/" + id,
-        {
-          method: "POST",
+    await api(
+      `/api/control/${id}`,
+      {
+        method:"POST",
+        body:JSON.stringify({
+          state
+        })
+      }
+    );
 
-          body: JSON.stringify({
-            state
-          })
-        }
-      );
-
-    if (!response.ok) {
-
-      const data =
-        await response.json();
-
-      alert(
-        data.error ||
-        "Control failed."
-      );
-
-      return;
-    }
+    showStatus(
+      state
+        ? "Appliance turned ON."
+        : "Appliance turned OFF."
+    );
 
     await loadDashboard();
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    showStatus(
+      error.message,
+      false
+    );
   }
 }
 
 
-// =====================================================
-// ROOM AUTO
-// =====================================================
+/* =========================
+   ROOM AUTO
+========================= */
 
-async function setRoomAuto(
-  enabled
-) {
+async function setRoomAuto(enabled){
 
-  try {
+  try{
 
-    const response =
-      await api(
-        "/api/room-auto",
-        {
-          method: "POST",
+    await api(
+      "/api/room-auto",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          enabled
+        })
+      }
+    );
 
-          body: JSON.stringify({
-            enabled
-          })
-        }
-      );
-
-    if (!response.ok) {
-
-      alert(
-        "Could not change Room Auto."
-      );
-
-      return;
-    }
+    showStatus(
+      enabled
+        ? "Room Auto enabled."
+        : "Room Auto disabled."
+    );
 
     await loadDashboard();
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    showStatus(
+      error.message,
+      false
+    );
   }
 }
 
 
-// =====================================================
-// TIMER
-// =====================================================
+/* =========================
+   TIMER
+========================= */
 
-async function createTimer(
-  id,
-  state
-) {
+async function createTimer(id){
 
-  const input =
+  const minutes=Number(
     document.getElementById(
-      "timer-" + id
-    );
+      `minutes-${id}`
+    ).value
+  );
 
-  const minutes =
-    Number(input.value);
+  const state=
+    document.getElementById(
+      `timerState-${id}`
+    ).value==="true";
 
-
-  if (
+  if(
     !Number.isFinite(minutes) ||
-    minutes <= 0
-  ) {
-
-    alert(
-      "Enter a valid number of minutes."
+    minutes<=0
+  ){
+    showStatus(
+      "Enter a valid timer in minutes.",
+      false
     );
-
-    input.focus();
-
     return;
   }
 
+  try{
 
-  try {
-
-    const response =
-      await api(
-        "/api/timer/" + id,
-        {
-          method: "POST",
-
-          body: JSON.stringify({
-            minutes,
-            state
-          })
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (!response.ok) {
-
-      alert(
-        data.error ||
-        "Timer failed."
-      );
-
-      return;
-    }
-
-
-    input.value = "";
-
-    await loadDashboard();
-
-  } catch (error) {
-
-    console.error(error);
-  }
-}
-
-
-// =====================================================
-// CANCEL TIMER
-// =====================================================
-
-async function cancelTimer(
-  id
-) {
-
-  try {
-
-    const response =
-      await api(
-        "/api/timer/" + id,
-        {
-          method: "DELETE"
-        }
-      );
-
-
-    if (!response.ok) {
-
-      alert(
-        "Could not cancel timer."
-      );
-
-      return;
-    }
-
-
-    await loadDashboard();
-
-  } catch (error) {
-
-    console.error(error);
-  }
-}
-
-
-// =====================================================
-// ERASE RUNTIME
-// =====================================================
-
-async function eraseRuntime(
-  id
-) {
-
-  const appliance =
-    dashboardData.appliances
-      .find(
-        a =>
-          Number(a.id) === id
-      );
-
-
-  const confirmed =
-    confirm(
-      "Erase runtime for " +
-      (appliance
-        ? appliance.name
-        : "this appliance") +
-      "?"
+    await api(
+      `/api/timer/${id}`,
+      {
+        method:"POST",
+        body:JSON.stringify({
+          minutes,
+          state
+        })
+      }
     );
 
+    showStatus(
+      "Timer created successfully."
+    );
 
-  if (!confirmed) {
+    await loadDashboard();
+
+  }catch(error){
+
+    showStatus(
+      error.message,
+      false
+    );
+  }
+}
+
+
+async function cancelTimer(id){
+
+  try{
+
+    await api(
+      `/api/timer/${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    showStatus(
+      "Timer cancelled."
+    );
+
+    await loadDashboard();
+
+  }catch(error){
+
+    showStatus(
+      error.message,
+      false
+    );
+  }
+}
+
+
+/* =========================
+   ERASE RUNTIME
+========================= */
+
+async function eraseRuntime(id){
+
+  if(
+    !confirm(
+      "Erase the accumulated runtime for this appliance?"
+    )
+  ){
     return;
   }
 
+  try{
 
-  try {
+    await api(
+      `/api/erase/${id}`,
+      {
+        method:"POST"
+      }
+    );
 
-    const response =
-      await api(
-        "/api/erase/" + id,
-        {
-          method: "POST"
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (!response.ok) {
-
-      alert(
-        data.error ||
-        "Erase failed."
-      );
-
-      return;
-    }
-
+    showStatus(
+      "Runtime erased successfully."
+    );
 
     await loadDashboard();
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    showStatus(
+      error.message,
+      false
+    );
   }
 }
 
 
-// =====================================================
-// LOAD SETTINGS
-// =====================================================
+/* =========================
+   LOAD SETTINGS
+========================= */
 
-function openLoadSettings(
-  id
-) {
+function openLoadSettings(id){
 
-  const appliance =
-    dashboardData.appliances
-      .find(
-        a =>
-          Number(a.id) === id
-      );
+  closeAllMenus();
 
+  const appliance=
+    dashboardData.appliances.find(
+      a=>Number(a.id)===Number(id)
+    );
 
-  if (!appliance) return;
+  const current=
+    appliance &&
+    appliance.power_w !== null &&
+    appliance.power_w !== undefined
+      ? appliance.power_w
+      : "";
 
+  document.getElementById(
+    "modalTitle"
+  ).textContent=
+    "Load Settings";
 
-  openModal(`
-    <h2>⚙ Load Settings</h2>
+  document.getElementById(
+    "modalContent"
+  ).innerHTML=`
 
     <p>
-      ${applianceIcons[id]}
-      <strong>
-        ${escapeHtml(appliance.name)}
-      </strong>
-    </p>
-
-    <p class="small">
-      Enter the rated power of this appliance.
-      Example: a 9W bulb → enter 9.
+      Enter the rated power of the appliance.
     </p>
 
     <input
@@ -1200,188 +1034,517 @@ function openLoadSettings(
       min="0"
       max="10000"
       step="0.1"
-      inputmode="decimal"
-      placeholder="Power in Watts"
-      value="${
-        appliance.power_w === null ||
-        appliance.power_w === undefined
-          ? ""
-          : appliance.power_w
-      }"
+      value="${escapeHtml(current)}"
+      placeholder="Example: 60"
     >
 
     <button
+      type="button"
       class="primary"
       onclick="saveLoadSettings(${id})"
     >
-      Save Watt
+      Save Watt Setting
     </button>
 
-    <button
-      class="secondary"
-      onclick="closeModal()"
-    >
-      Cancel
-    </button>
+  `;
 
-    <div class="notice">
-      Energy is estimated from:
-      <br>
-      <strong>
-        Watt × Runtime
-      </strong>
-      <br>
-      No physical power sensor is being used.
-    </div>
-  `);
+  openModal();
 }
 
 
-async function saveLoadSettings(
-  id
-) {
+async function saveLoadSettings(id){
 
-  const watts =
-    Number(
-      document
-        .getElementById(
-          "loadWatts"
-        )
-        .value
+  const watts=Number(
+    document.getElementById(
+      "loadWatts"
+    ).value
+  );
+
+  if(
+    !Number.isFinite(watts) ||
+    watts<0 ||
+    watts>10000
+  ){
+    alert(
+      "Watt must be between 0 and 10000."
+    );
+    return;
+  }
+
+  try{
+
+    await api(
+      `/api/load/${id}`,
+      {
+        method:"POST",
+        body:JSON.stringify({
+          watts
+        })
+      }
     );
 
+    closeModal();
 
-  if (
-    !Number.isFinite(watts) ||
-    watts < 0
-  ) {
+    showStatus(
+      "Watt setting saved."
+    );
+
+    await loadDashboard();
+
+  }catch(error){
+
+    alert(error.message);
+  }
+}
+
+
+/* =========================
+   HISTORY
+========================= */
+
+function openHistory(id){
+
+  closeAllMenus();
+
+  document.getElementById(
+    "modalTitle"
+  ).textContent="Energy History";
+
+  document.getElementById(
+    "modalContent"
+  ).innerHTML=`
+
+    <select id="historyPeriod">
+      <option value="today">
+        Today
+      </option>
+      <option value="month" selected>
+        This Month
+      </option>
+      <option value="year">
+        This Year
+      </option>
+    </select>
+
+    <button
+      type="button"
+      class="primary"
+      onclick="loadHistory(${id})"
+    >
+      Load History
+    </button>
+
+    <div
+      id="historyContent"
+      style="margin-top:15px"
+    >
+      Select a period and load history.
+    </div>
+
+  `;
+
+  openModal();
+}
+
+
+async function loadHistory(id){
+
+  const period=
+    document.getElementById(
+      "historyPeriod"
+    ).value;
+
+  const content=
+    document.getElementById(
+      "historyContent"
+    );
+
+  content.innerHTML=
+    "Loading...";
+
+  try{
+
+    const response=
+      await api(
+        `/api/history/${id}?period=${encodeURIComponent(period)}`
+      );
+
+    let html=`
+
+      <div class="stat">
+        Total Runtime
+        <b>
+          ${formatRuntime(
+            response.totalRuntimeSeconds
+          )}
+        </b>
+      </div>
+
+      <br>
+
+      <div class="stat">
+        Total Estimated Energy
+        <b>
+          ${formatEnergy(
+            response.totalEnergyWh
+          )}
+        </b>
+      </div>
+
+      <br>
+
+    `;
+
+    if(
+      !response.rows ||
+      response.rows.length===0
+    ){
+
+      html+=`
+        <p>
+          No history recorded for this period.
+        </p>
+      `;
+
+    }else{
+
+      response.rows.forEach(row=>{
+
+        html+=`
+
+          <div class="historyRow">
+
+            <b>
+              ${escapeHtml(
+                row.usage_date
+              )}
+            </b>
+
+            <br>
+
+            Runtime:
+            ${formatRuntime(
+              row.runtime_seconds
+            )}
+
+            <br>
+
+            Energy:
+            ${formatEnergy(
+              row.energy_wh
+            )}
+
+          </div>
+
+        `;
+      });
+    }
+
+    content.innerHTML=html;
+
+  }catch(error){
+
+    content.innerHTML=
+      `<p style="color:#b00000">
+        ${escapeHtml(
+          error.message
+        )}
+      </p>`;
+  }
+}
+
+
+/* =========================
+   ACCESS CODE
+========================= */
+
+function openCodeModal(){
+
+  document.getElementById(
+    "modalTitle"
+  ).textContent=
+    "Change Dashboard Access Code";
+
+  document.getElementById(
+    "modalContent"
+  ).innerHTML=`
+
+    <p>
+      New access code must contain at least 6 characters.
+    </p>
+
+    <input
+      id="newAccessCode"
+      type="password"
+      minlength="6"
+      placeholder="New access code"
+    >
+
+    <input
+      id="confirmAccessCode"
+      type="password"
+      minlength="6"
+      placeholder="Confirm new access code"
+    >
+
+    <button
+      type="button"
+      class="primary"
+      onclick="changeAccessCode()"
+    >
+      Change Access Code
+    </button>
+
+  `;
+
+  openModal();
+}
+
+
+async function changeAccessCode(){
+
+  const newCode=
+    document.getElementById(
+      "newAccessCode"
+    ).value.trim();
+
+  const confirmCode=
+    document.getElementById(
+      "confirmAccessCode"
+    ).value.trim();
+
+  if(newCode.length<6){
 
     alert(
-      "Enter a valid Watt value."
+      "Access code must contain at least 6 characters."
     );
 
     return;
   }
 
+  if(newCode!==confirmCode){
 
-  try {
+    alert(
+      "The two access codes do not match."
+    );
 
-    const response =
-      await api(
-        "/api/load/" + id,
-        {
-          method: "POST",
+    return;
+  }
 
-          body: JSON.stringify({
-            watts
-          })
-        }
-      );
+  try{
 
-
-    const data =
-      await response.json();
-
-
-    if (!response.ok) {
-
-      alert(
-        data.error ||
-        "Could not save Watt."
-      );
-
-      return;
-    }
-
+    await api(
+      "/api/change-access-code",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          newCode
+        })
+      }
+    );
 
     closeModal();
 
-    await loadDashboard();
+    alert(
+      "Access code changed successfully. Please use the new code next time."
+    );
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    alert(error.message);
   }
 }
 
 
-// =====================================================
-// HISTORY
-// =====================================================
+/* =========================
+   MODALS / MENUS
+========================= */
 
-async function openHistory(
-  id
-) {
+function openModal(){
 
-  const appliance =
-    dashboardData.appliances
-      .find(
-        a =>
-          Number(a.id) === id
-      );
-
-
-  if (!appliance) return;
-
-
-  openModal(`
-    <h2>
-      📊 ${escapeHtml(appliance.name)} History
-    </h2>
-
-    <select id="historyPeriod">
-      <option value="today">Today</option>
-      <option value="month">This Month</option>
-      <option value="year">This Year</option>
-    </select>
-
-    <div id="historyContent">
-      Loading...
-    </div>
-  `);
-
-
-  document
-    .getElementById(
-      "historyPeriod"
-    )
-    .addEventListener(
-      "change",
-      () => loadHistory(
-        id
-      )
-    );
-
-
-  await loadHistory(id);
+  document.getElementById(
+    "modalBg"
+  ).style.display="flex";
 }
 
 
-async function loadHistory(
-  id
-) {
+function closeModal(){
 
-  const period =
-    document
-      .getElementById(
-        "historyPeriod"
-      )
-      .value;
+  document.getElementById(
+    "modalBg"
+  ).style.display="none";
+}
 
 
-  const content =
-    document
-      .getElementById(
-        "historyContent"
-      );
+function closeModalOutside(event){
+
+  if(
+    event.target ===
+    document.getElementById("modalBg")
+  ){
+    closeModal();
+  }
+}
 
 
-  content.innerHTML =
-    "Loading...";
+function toggleMenu(id){
+
+  const menu=
+    document.getElementById(
+      `menu-${id}`
+    );
+
+  const wasOpen=
+    menu.style.display==="block";
+
+  closeAllMenus();
+
+  if(!wasOpen){
+    menu.style.display="block";
+  }
+}
 
 
-  try {
+function closeAllMenus(){
 
-    const response =
-      await api(
- 
+  document
+    .querySelectorAll(".menuBox")
+    .forEach(menu=>{
+      menu.style.display="none";
+    });
+}
+
+
+/* =========================
+   FORMATTING
+========================= */
+
+function formatRuntime(seconds){
+
+  let total=
+    Math.max(
+      0,
+      Number(seconds||0)
+    );
+
+  const days=
+    Math.floor(
+      total/86400
+    );
+
+  total%=86400;
+
+  const hours=
+    Math.floor(
+      total/3600
+    );
+
+  total%=3600;
+
+  const minutes=
+    Math.floor(
+      total/60
+    );
+
+  const secs=
+    Math.floor(
+      total%60
+    );
+
+  const parts=[];
+
+  if(days) parts.push(days+"d");
+  if(hours) parts.push(hours+"h");
+  if(minutes) parts.push(minutes+"m");
+
+  parts.push(secs+"s");
+
+  return parts.join(" ");
+}
+
+
+function formatEnergy(wh){
+
+  const value=
+    Number(wh||0);
+
+  if(value>=1000){
+
+    return (
+      value/1000
+    ).toFixed(3)+" kWh";
+
+  }
+
+  return value.toFixed(3)+" Wh";
+}
+
+
+function formatTimerDate(value){
+
+  try{
+
+    return new Date(value)
+      .toLocaleString();
+
+  }catch{
+
+    return String(value);
+  }
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout(){
+
+  TOKEN="";
+
+  dashboardData=null;
+
+  if(refreshTimer){
+    clearInterval(refreshTimer);
+    refreshTimer=null;
+  }
+
+  document
+    .getElementById("dashboardPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginPage")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("loginCode")
+    .value="";
+
+  document
+    .getElementById("loginStatus")
+    .style.display="none";
+}
+
+
+/* =========================
+   CLOSE MENUS WHEN CLICKING
+========================= */
+
+document.addEventListener(
+  "click",
+  event=>{
+
+    if(
+      !event.target.closest(".menu")
+    ){
+      closeAllMenus();
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
