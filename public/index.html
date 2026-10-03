@@ -248,11 +248,45 @@ button:disabled{
   margin-top:8px;
 }
 
+.billBox{
+  background:#f7f3ff;
+  padding:14px;
+  border-radius:11px;
+  margin-top:12px;
+}
+
+.billRow{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:7px 0;
+  border-bottom:1px solid #e5e0ef;
+}
+
+.billRow:last-child{
+  border-bottom:0;
+}
+
+.billTotal{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
 .tariffInfo{
   background:#fff7df;
   padding:12px;
   border-radius:10px;
   margin-top:12px;
+}
+
+.warningInfo{
+  background:#fff4d6;
+  color:#725000;
+  padding:11px;
+  border-radius:9px;
+  margin-top:10px;
+  font-size:13px;
 }
 
 .modalBg{
@@ -389,14 +423,6 @@ button:disabled{
 
     <button
       type="button"
-      class="secondary"
-      onclick="openTariffModal()"
-    >
-      Electricity Rate
-    </button>
-
-    <button
-      type="button"
       class="danger"
       onclick="logout()"
     >
@@ -461,16 +487,29 @@ button:disabled{
 
   <div class="tariffInfo">
 
-    Electricity Rate:
+    <b>Electricity Bill Calculation</b>
 
-    <b id="tariffDisplay">
-      ₹8.00 / kWh
+    <br><br>
+
+    WBSEDCL Domestic Urban
+
+    <br>
+
+    <span class="smallText">
+      2025–26 published net tariff after applicable
+      government subsidy.
+    </span>
+
+    <br><br>
+
+    <b>
+      Automatic slab calculation
     </b>
 
     <br>
 
     <span class="smallText">
-      This rate is used only for estimated cost calculation.
+      No manual ₹/kWh rate required.
     </span>
 
   </div>
@@ -534,6 +573,80 @@ button:disabled{
       </b>
 
     </div>
+
+  </div>
+
+</div>
+
+
+<!-- WBSEDCL BILL -->
+
+<div class="card">
+
+  <h2>WBSEDCL Estimated Bill</h2>
+
+  <div class="billBox">
+
+    <div class="billRow">
+
+      <span>
+        Current quarter energy
+      </span>
+
+      <b id="quarterEnergy">
+        0.000 kWh
+      </b>
+
+    </div>
+
+
+    <div class="billRow">
+
+      <span>
+        Energy charge
+      </span>
+
+      <b id="billEnergyCharge">
+        ₹0.00
+      </b>
+
+    </div>
+
+
+    <div class="billRow">
+
+      <span>
+        Fixed charge
+      </span>
+
+      <b>
+        Not included
+      </b>
+
+    </div>
+
+
+    <div class="billTotal">
+
+      Estimated energy bill:
+
+      <span id="estimatedBill">
+        ₹0.00
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div class="warningInfo">
+
+    This is an estimated energy-charge calculation.
+    Actual WBSEDCL bills can include fixed charges,
+    electricity duty, FPPCA/other applicable items,
+    rebates and consumer-specific adjustments.
+    Sanctioned load is not available from the ESP8266,
+    so those items are not fabricated here.
 
   </div>
 
@@ -604,54 +717,362 @@ let dashboardData = null;
 
 let refreshTimer = null;
 
+let quarterEnergyData = {};
+
+let quarterEnergyLoadedAt = 0;
+
 
 /* =========================
-   LOCAL ELECTRICITY RATE
+   WBSEDCL TARIFF ENGINE
 ========================= */
 
-function getTariff(){
+/*
+  WBSEDCL 2025-26
+  Domestic Urban
+  Net rate after government subsidy
 
-  const saved =
-    localStorage.getItem(
-      "ecosmart_tariff"
-    );
+  Quarterly slabs:
 
-  const value =
-    Number(saved);
+  First 102 kWh  -> ₹4.15/kWh
+  Next 78 kWh    -> ₹5.37/kWh
+  Next 120 kWh   -> ₹6.38/kWh
+  Next 300 kWh   -> ₹6.73/kWh
+  Next 300 kWh   -> ₹6.89/kWh
 
-  if(
-    Number.isFinite(value) &&
-    value >= 0 &&
-    value <= 1000
-  ){
-    return value;
+  The official table lists these as
+  quarterly consumption slabs.
+*/
+
+const WBSEDCL_URBAN_SLABS = [
+
+  {
+    limit:102,
+    rate:4.15
+  },
+
+  {
+    limit:78,
+    rate:5.37
+  },
+
+  {
+    limit:120,
+    rate:6.38
+  },
+
+  {
+    limit:300,
+    rate:6.73
+  },
+
+  {
+    limit:300,
+    rate:6.89
   }
 
-  return 8;
+];
+
+
+/*
+  For consumption above the published
+  fifth slab, keep the fifth published
+  rate as an estimate rather than inventing
+  a new rate.
+*/
+
+function calculateWbsedclEnergyCharge(
+  kwh
+){
+
+  let remaining =
+    Math.max(
+      0,
+      Number(kwh || 0)
+    );
+
+  let charge = 0;
+
+  let breakdown = [];
+
+  for(
+    const slab of WBSEDCL_URBAN_SLABS
+  ){
+
+    if(remaining <= 0){
+
+      break;
+
+    }
+
+
+    const used =
+      Math.min(
+        remaining,
+        slab.limit
+      );
+
+
+    const slabCharge =
+      used * slab.rate;
+
+
+    charge +=
+      slabCharge;
+
+
+    breakdown.push({
+
+      units:used,
+
+      rate:slab.rate,
+
+      charge:slabCharge
+
+    });
+
+
+    remaining -=
+      used;
+
+  }
+
+
+  if(remaining > 0){
+
+    const lastRate =
+      WBSEDCL_URBAN_SLABS[
+        WBSEDCL_URBAN_SLABS.length - 1
+      ].rate;
+
+
+    const extraCharge =
+      remaining * lastRate;
+
+
+    charge +=
+      extraCharge;
+
+
+    breakdown.push({
+
+      units:remaining,
+
+      rate:lastRate,
+
+      charge:extraCharge,
+
+      estimated:true
+
+    });
+
+  }
+
+
+  return {
+
+    charge,
+
+    breakdown
+
+  };
+
 }
 
 
-function saveTariff(value){
+/* =========================
+   QUARTER HELPERS
+========================= */
 
-  localStorage.setItem(
-    "ecosmart_tariff",
-    String(value)
+function getQuarterStartDate(){
+
+  const now =
+    new Date();
+
+
+  const month =
+    now.getMonth();
+
+
+  const quarterStartMonth =
+    Math.floor(month / 3) * 3;
+
+
+  return new Date(
+    now.getFullYear(),
+    quarterStartMonth,
+    1
   );
 
 }
 
 
-function updateTariffDisplay(){
+function dateOnly(
+  value
+){
 
-  const tariff =
-    getTariff();
+  if(!value){
 
-  document.getElementById(
-    "tariffDisplay"
-  ).textContent =
-    "₹" +
-    tariff.toFixed(2) +
-    " / kWh";
+    return null;
+
+  }
+
+
+  const d =
+    new Date(
+      value + (
+        String(value).length === 10
+          ? "T00:00:00"
+          : ""
+      )
+    );
+
+
+  if(
+    Number.isNaN(
+      d.getTime()
+    )
+  ){
+
+    return null;
+
+  }
+
+
+  return d;
+
+}
+
+
+/*
+  Get quarter-to-date energy from yearly
+  history.
+
+  We use the backend history endpoint because
+  WBSEDCL's published slabs are quarterly.
+*/
+
+async function loadQuarterEnergy(){
+
+  if(
+    Date.now() -
+    quarterEnergyLoadedAt <
+    60000
+  ){
+
+    return quarterEnergyData;
+
+  }
+
+
+  const appliances =
+    dashboardData &&
+    dashboardData.appliances
+      ? dashboardData.appliances
+      : [];
+
+
+  if(!appliances.length){
+
+    return {};
+
+  }
+
+
+  const quarterStart =
+    getQuarterStartDate();
+
+
+  const result = {};
+
+
+  for(
+    const appliance of appliances
+  ){
+
+    try{
+
+      const response =
+        await api(
+          `/api/history/${appliance.id}?period=year`
+        );
+
+
+      let totalWh = 0;
+
+
+      const rows =
+        Array.isArray(
+          response.rows
+        )
+          ? response.rows
+          : [];
+
+
+      rows.forEach(
+        row=>{
+
+          const rowDate =
+            dateOnly(
+              row.usage_date
+            );
+
+
+          if(
+            !rowDate ||
+            rowDate <
+            quarterStart
+          ){
+
+            return;
+
+          }
+
+
+          totalWh +=
+            Math.max(
+              0,
+              Number(
+                row.energy_wh || 0
+              )
+            );
+
+        }
+      );
+
+
+      result[
+        appliance.id
+      ] =
+        totalWh;
+
+    }catch(error){
+
+      console.warn(
+        "Quarter history failed for appliance",
+        appliance.id,
+        error
+      );
+
+
+      result[
+        appliance.id
+      ] = 0;
+
+    }
+
+  }
+
+
+  quarterEnergyData =
+    result;
+
+
+  quarterEnergyLoadedAt =
+    Date.now();
+
+
+  return result;
+
 }
 
 
@@ -852,9 +1273,13 @@ async function login(){
       );
 
 
-    updateTariffDisplay();
-
     renderDashboard();
+
+
+    await loadQuarterEnergy();
+
+    updateWbsedclBill();
+
 
     startAutoRefresh();
 
@@ -913,7 +1338,32 @@ async function loadDashboard(){
         "/api/dashboard"
       );
 
+
     renderDashboard();
+
+
+    /*
+      Quarter data is refreshed only
+      once per minute to avoid sending
+      too many history requests.
+    */
+
+    if(
+      Date.now() -
+      quarterEnergyLoadedAt >=
+      60000
+    ){
+
+      await loadQuarterEnergy();
+
+      updateWbsedclBill();
+
+    }else{
+
+      updateWbsedclBill();
+
+    }
+
 
   }catch(error){
 
@@ -974,9 +1424,6 @@ function renderDashboard(){
     return;
 
   }
-
-
-  updateTariffDisplay();
 
 
   const device =
@@ -1043,6 +1490,8 @@ function renderDashboard(){
 
   updateTotalSummary();
 
+  updateWbsedclBill();
+
 }
 
 
@@ -1093,12 +1542,16 @@ function createApplianceCards(){
         todayEnergyWh / 1000;
 
 
-      const tariff =
-        getTariff();
+      const quarterWh =
+        Number(
+          quarterEnergyData[
+            appliance.id
+          ] || 0
+        );
 
 
-      const estimatedCost =
-        todayEnergyKwh * tariff;
+      const quarterKwh =
+        quarterWh / 1000;
 
 
       const synchronized =
@@ -1372,18 +1825,45 @@ function createApplianceCards(){
 
           </span>
 
+          <br><br>
+
+          <span class="smallText">
+
+            Current quarter:
+
+          </span>
+
+          <br>
+
+          <b>
+
+            ${quarterKwh.toFixed(6)}
+            kWh
+
+          </b>
+
         </div>
 
 
         <div class="costBox">
 
-          Estimated Cost Today:
+          Quarter energy share:
 
           <b>
 
-            ₹${estimatedCost.toFixed(2)}
+            ${quarterKwh.toFixed(6)}
+            kWh
 
           </b>
+
+          <br>
+
+          <span class="smallText">
+
+            Final household slab is calculated
+            from total household consumption.
+
+          </span>
 
         </div>
 
@@ -1552,8 +2032,17 @@ function updateTotalSummary(){
     totalEnergyWh / 1000;
 
 
-  const totalCost =
-    totalKwh * getTariff();
+  /*
+    Today's cost is intentionally only
+    a quick energy estimate.
+
+    The proper WBSEDCL slab calculation
+    is shown separately using quarter data.
+  */
+
+  const todayAverageEstimate =
+    totalKwh *
+    4.15;
 
 
   document.getElementById(
@@ -1575,7 +2064,93 @@ function updateTotalSummary(){
     "totalCost"
   ).textContent =
     "₹" +
-    totalCost.toFixed(2);
+    todayAverageEstimate.toFixed(2);
+
+}
+
+
+/* =========================
+   WBSEDCL BILL
+========================= */
+
+function updateWbsedclBill(){
+
+  if(!dashboardData){
+
+    return;
+
+  }
+
+
+  const appliances =
+    dashboardData.appliances || [];
+
+
+  let totalQuarterWh = 0;
+
+
+  appliances.forEach(
+    appliance=>{
+
+      totalQuarterWh +=
+        Math.max(
+          0,
+          Number(
+            quarterEnergyData[
+              appliance.id
+            ] || 0
+          )
+        );
+
+    }
+  );
+
+
+  const totalQuarterKwh =
+    totalQuarterWh / 1000;
+
+
+  const calculation =
+    calculateWbsedclEnergyCharge(
+      totalQuarterKwh
+    );
+
+
+  document.getElementById(
+    "quarterEnergy"
+  ).textContent =
+    totalQuarterKwh.toFixed(3) +
+    " kWh";
+
+
+  document.getElementById(
+    "billEnergyCharge"
+  ).textContent =
+    "₹" +
+    calculation.charge.toFixed(2);
+
+
+  document.getElementById(
+    "estimatedBill"
+  ).textContent =
+    "₹" +
+    calculation.charge.toFixed(2);
+
+
+  /*
+    Re-render appliance cards so their
+    quarter energy values stay current.
+  */
+
+  if(
+    document.getElementById(
+      "appliances"
+    )
+  ){
+
+    createApplianceCards();
+
+  }
 
 }
 
@@ -1802,6 +2377,11 @@ async function eraseRuntime(
     );
 
 
+    quarterEnergyData = {};
+
+    quarterEnergyLoadedAt = 0;
+
+
     showStatus(
       "Runtime erased successfully."
     );
@@ -1941,6 +2521,11 @@ async function saveLoadSettings(
     );
 
 
+    quarterEnergyData = {};
+
+    quarterEnergyLoadedAt = 0;
+
+
     await loadDashboard();
 
 
@@ -2057,8 +2642,10 @@ async function loadHistory(
       totalWh / 1000;
 
 
-    const totalCost =
-      totalKwh * getTariff();
+    const bill =
+      calculateWbsedclEnergyCharge(
+        totalKwh
+      );
 
 
     let html = `
@@ -2107,11 +2694,11 @@ async function loadHistory(
 
       <div class="stat">
 
-        Estimated Cost
+        WBSEDCL Slab Energy Charge Estimate
 
         <b>
 
-          ₹${totalCost.toFixed(2)}
+          ₹${bill.charge.toFixed(2)}
 
         </b>
 
@@ -2151,10 +2738,6 @@ async function loadHistory(
             rowWh / 1000;
 
 
-          const rowCost =
-            rowKwh * getTariff();
-
-
           html += `
 
             <div class="historyRow">
@@ -2186,14 +2769,6 @@ async function loadHistory(
               ${rowKwh.toFixed(6)}
               kWh
 
-
-              <br>
-
-
-              Estimated Cost:
-
-              ₹${rowCost.toFixed(2)}
-
             </div>
 
           `;
@@ -2223,113 +2798,6 @@ async function loadHistory(
     `;
 
   }
-
-}
-
-
-/* =========================
-   ELECTRICITY RATE
-========================= */
-
-function openTariffModal(){
-
-  document.getElementById(
-    "modalTitle"
-  ).textContent =
-    "Electricity Rate";
-
-
-  const current =
-    getTariff();
-
-
-  document.getElementById(
-    "modalContent"
-  ).innerHTML = `
-
-    <p>
-
-      Enter your electricity tariff in
-      <b>₹ per kWh (unit)</b>.
-
-    </p>
-
-
-    <input
-      id="tariffInput"
-      type="number"
-      min="0"
-      max="1000"
-      step="0.01"
-      value="${current.toFixed(2)}"
-      placeholder="Example: 8"
-    >
-
-
-    <p class="smallText">
-
-      This is used to calculate estimated
-      electricity cost. Actual electricity
-      bills may include slabs, fixed charges,
-      taxes and other fees.
-
-    </p>
-
-
-    <button
-      type="button"
-      class="primary"
-      onclick="saveTariffFromModal()"
-    >
-
-      Save Electricity Rate
-
-    </button>
-
-  `;
-
-
-  openModal();
-
-}
-
-
-function saveTariffFromModal(){
-
-  const value =
-    Number(
-      document.getElementById(
-        "tariffInput"
-      ).value
-    );
-
-
-  if(
-    !Number.isFinite(value) ||
-    value < 0 ||
-    value > 1000
-  ){
-
-    alert(
-      "Rate must be between ₹0 and ₹1000 per kWh."
-    );
-
-    return;
-
-  }
-
-
-  saveTariff(value);
-
-  updateTariffDisplay();
-
-  closeModal();
-
-  renderDashboard();
-
-  showStatus(
-    "Electricity rate saved."
-  );
 
 }
 
@@ -2664,6 +3132,12 @@ function logout(){
 
   dashboardData =
     null;
+
+  quarterEnergyData =
+    {};
+
+  quarterEnergyLoadedAt =
+    0;
 
 
   if(refreshTimer){
