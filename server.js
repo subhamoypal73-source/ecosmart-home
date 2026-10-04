@@ -564,16 +564,24 @@ app.post(
             )
           );
 
-        await supabase
-          .from("appliances")
-          .update({
-            reported_state: state,
-            runtime_seconds: runtime,
-            last_seen:
-              new Date().toISOString(),
-            online: true
-          })
-          .eq("id", id);
+        const { error: applianceUpdateError } =
+          await supabase
+            .from("appliances")
+            .update({
+              reported_state: state,
+              runtime_seconds: runtime,
+              last_seen:
+                new Date().toISOString(),
+              online: true
+            })
+            .eq("id", id);
+
+        if (applianceUpdateError) {
+          console.error(
+            `Appliance ${id} report update error:`,
+            applianceUpdateError.message
+          );
+        }
 
         // Record estimated energy history.
         await recordEnergyUsage(
@@ -607,23 +615,39 @@ app.post(
           change.state === true ||
           change.state === 1;
 
-        await supabase
-          .from("appliances")
-          .update({
-            desired_state: state
-          })
-          .eq("id", id);
+        const { error: manualUpdateError } =
+          await supabase
+            .from("appliances")
+            .update({
+              desired_state: state
+            })
+            .eq("id", id);
+
+        if (manualUpdateError) {
+          console.error(
+            `Manual change update error for appliance ${id}:`,
+            manualUpdateError.message
+          );
+        }
 
         // Physical Room Light switch
         // disables automatic mode.
         if (id === 0) {
 
-          await supabase
-            .from("settings")
-            .update({
-              room_auto: false
-            })
-            .eq("id", 1);
+          const { error: autoDisableError } =
+            await supabase
+              .from("settings")
+              .update({
+                room_auto: false
+              })
+              .eq("id", 1);
+
+          if (autoDisableError) {
+            console.error(
+              "Room auto disable error:",
+              autoDisableError.message
+            );
+          }
         }
       }
 
@@ -632,19 +656,27 @@ app.post(
       // Device status
       // -----------------------------------------
 
-      await supabase
-        .from("devices")
-        .update({
-          last_seen:
-            new Date().toISOString(),
+      const { error: deviceUpdateError } =
+        await supabase
+          .from("devices")
+          .update({
+            last_seen:
+              new Date().toISOString(),
 
-          online: true,
+            online: true,
 
-          ldr_value: ldr,
+            ldr_value: ldr,
 
-          uptime_seconds: uptime
-        })
-        .eq("id", 1);
+            uptime_seconds: uptime
+          })
+          .eq("id", 1);
+
+      if (deviceUpdateError) {
+        console.error(
+          "Device status update error:",
+          deviceUpdateError.message
+        );
+      }
 
 
       // -----------------------------------------
@@ -656,13 +688,74 @@ app.post(
         "boolean"
       ) {
 
-        await supabase
-          .from("settings")
+        const { error: roomAutoError } =
+          await supabase
+            .from("settings")
+            .update({
+              room_auto:
+                body.roomAuto
+            })
+            .eq("id", 1);
+
+        if (roomAutoError) {
+          console.error(
+            "Room auto state update error:",
+            roomAutoError.message
+          );
+        }
+      }
+
+
+      // =================================================
+      // IMPORTANT:
+      // ROOM LIGHT LDR AUTO STATE -> DESIRED STATE
+      // =================================================
+      //
+      // When Room Auto is enabled, the ESP8266 sends
+      // roomAutoState according to the LDR-controlled
+      // physical relay state.
+      //
+      // Example:
+      //
+      // LDR detects DARK
+      //       ↓
+      // Room Light relay = ON
+      //       ↓
+      // ESP sends roomAutoState = true
+      //       ↓
+      // Supabase desired_state = true
+      //       ↓
+      // Dashboard Command = ON
+      //
+      // This keeps Command and Device synchronized
+      // while Room Auto is active.
+      // =================================================
+
+      if (
+        body.roomAuto === true &&
+        body.roomAutoState !== undefined
+      ) {
+
+        const roomAutoState =
+          body.roomAutoState === true ||
+          body.roomAutoState === 1;
+
+        const {
+          error: roomAutoStateError
+        } = await supabase
+          .from("appliances")
           .update({
-            room_auto:
-              body.roomAuto
+            desired_state:
+              roomAutoState
           })
-          .eq("id", 1);
+          .eq("id", 0);
+
+        if (roomAutoStateError) {
+          console.error(
+            "Room Auto desired state update error:",
+            roomAutoStateError.message
+          );
+        }
       }
 
 
